@@ -1,3 +1,0 @@
-#!/bin/bash
-SECRET_KEY=`cat .env | grep SECRET_KEY | cut -b 12-`
-docker run -it -e SECRET_KEY=$SECRET_KEY -p 8000:8000 better-calendar-api
