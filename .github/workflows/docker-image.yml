@@ -7,6 +7,22 @@ on:
     branches: [ "master" ]
 
 jobs:
+  publish-docker-image:
+    runs-on: ubuntu-latest
+    steps: 
+    - uses: actions/checkout@v3
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Build the Docker Image
+      run: |
+            docker buildx build -t better-calendar-api .
+    
+      
+    
 
   build:
 
@@ -15,4 +31,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker buildx build -t better-calendar-api .
+      run: |
+              docker buildx build -t ghcr.io/Szade-Organization/BetterCalendar-API:latest
+              docker run ghcr.io/Szade-Organization/BetterCalendar-API:latest
+              docker push ghcr.io/Szade-Organization/BetterCalendar-API:latest
