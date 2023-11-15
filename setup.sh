@@ -44,6 +44,14 @@ if [ "$HELP" = true ] ; then
     echo "Options:"
     echo "-r/--rebuild: stops and removes the docker image before rubuilding it again. Doesn't check if the containers actually exists,"
     echo "-h/--help: display this help message,"
+    echo "To test the API, run 'curl -H 'Accept: application/json; indent=4' http://127.0.0.1:8000/api/info'"
+    echo "To operate the container use:"
+    echo "To stop the container, run 'docker stop better-calendar-api'"
+    echo "To start the container, run 'docker start better-calendar-api'"
+    echo "To restart the container, run 'docker restart better-calendar-api'"
+    echo "To view the logs, run 'docker logs better-calendar-api'"
+    echo 'To uninstall the container, run "docker stop better-calendar-api && docker rm better-calendar-api"'
+    
     exit 0
 fi
 
@@ -90,6 +98,17 @@ else
     exit 1
 fi
 if docker start better-calendar-api ; then
+    sleep 2
+    if curl -H 'Accept: application/json; indent=4' http://127.0.0.1:8000/api/info ; then
+        :
+    else
+        echo -e "${RED}Docker start succeeded, but the API has not responded correctly!${COLOR_OFF}"
+        echo "Check the logs with 'docker logs better-calendar-api'"
+        echo "Test the API with 'curl -H 'Accept: application/json; indent=4' http://127.0.0.1:8000/api/info'"
+        exit 1
+    fi
+    echo
+    docker logs better-calendar-api
     echo 
     echo -e "${GREEN}better-calendar-api installed and started successfully!${COLOR_OFF}"
     echo
