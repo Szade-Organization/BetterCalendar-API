@@ -12,7 +12,7 @@ class APIInformationView(APIView):
         """
         data = {
             'api_name': 'BetterCalendar-API',
-            'version': '0.0.1',
+            'version': 'v0.0.1',
             'description': 'An API for BetterCalendar project. Currently in development - this is the only view.',
         }
         return Response(data, status=status.HTTP_200_OK)

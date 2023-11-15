@@ -1,20 +1,55 @@
 #!/bin/bash
 
-# Colors
 RED='\033[0;31m'
 COLOR_OFF='\033[0m'
 GREEN='\033[0;32m'
 
-if [ "$1" == "--help" ]; then
+POSITIONAL_ARGS=()
+REBUILD=false
+HELP=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -r|--rebuild)
+            REBUILD=true
+            shift
+            ;;
+        -h|--help)
+            HELP=true
+            shift
+            ;;
+        -*|--*)
+            echo -e "${RED}ERROR:"
+            echo -e "Unknown option $1${COLOR_OFF}"
+            exit 1
+            ;;
+        *)
+            POSITIONAL_ARGS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}"
+
+if [ "$HELP" = true ] ; then
     echo "Usage: ./setup.sh"
     echo "This script will build and run the docker container for the better-calendar-api."
     echo "You must have docker and docker buildx installed for this script to work."
-    echo "You must have a .env file in the same directory as this script"
-    echo "The .env file must contain a SECRET_KEY variable"
+    echo "You must have a .env file in the same directory as this script."
+    echo "The .env file must contain a SECRET_KEY variable."
     echo ".env file should look like this:"
     echo "cat .env"
     echo "SECRET_KEY=your_secret_key"
+    echo "Options:"
+    echo "-r/--rebuild: stops and removes the docker image before rubuilding it again. Doesn't check if the containers actually exists,"
+    echo "-h/--help: display this help message,"
     exit 0
+fi
+
+if [ "$REBUILD" = true ] ; then
+    docker stop better-calendar-api
+    docker rm better-calendar-api
 fi
 
 if [ ! -f .env ]; then
@@ -33,7 +68,13 @@ else
     exit 1
 fi
 
-if docker buildx build -t better-calendar-api . ; then
+if [ "$REBUILD"  = false ] && docker ps -a | grep -q better-calendar-api  ; then
+    echo -e "${RED}ERROR:"
+    echo -e "Container already exists! If you want to reinstall, run this script with the -r/--rebuild option${COLOR_OFF}"
+    exit 1
+fi
+
+if  docker buildx build -t better-calendar-api . ; then
     :
 else
     echo -e "${RED}Docker build failed!${COLOR_OFF}"
@@ -43,8 +84,8 @@ if docker run -itd -e SECRET_KEY=$SECRET_KEY -p 8000:8000 --name better-calendar
     :
 else
     echo -e "${RED}Docker run failed!${COLOR_OFF}"
-    if  docker ps -a | grep -q better-calendar-api  ; then
-        echo "Container already exists! If you want to reinstall, run 'docker stop better-calendar-api && docker rm better-calendar-api' and then rerun this script"
+    if docker ps -a | grep -q better-calendar-api  ; then
+        echo "Container already exists! If you want to reinstall, run this script with the -r/--rebuild option"
     fi
     exit 1
 fi
