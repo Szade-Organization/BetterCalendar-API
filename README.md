@@ -35,3 +35,10 @@ Using httpie:
     
     You can also use other methods such as fetch or curl.
             
+
+
+If you want to update or reinstall the app use:  
+`./setup --rebuild` or `./setup -r`  
+**Warning! The previous version will be lost, as this overrides it.**  
+  
+There is also a `./setup -h` or `./setup --help` flag for displaying help.  
