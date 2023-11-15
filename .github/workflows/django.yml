@@ -17,6 +17,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Set up SECRET_KEY as environment variable
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY}}      
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
@@ -26,7 +29,5 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Run Tests
-        env:
-          SECRET_KEY: ${{ secrets.SECRET_KEY}}
-        run: |
-          python config/manage.py test
+      run: |
+        python config/manage.py test
