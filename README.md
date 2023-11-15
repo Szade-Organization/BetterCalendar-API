@@ -7,10 +7,8 @@ To run:
 > SECRET_KEY=your_secret_key  
 .env for the development purposes file has been sent to you.  
 Remember to never share the secret key, and not to push the .env file to the repository - it is already in .gitignore by default.
-3. Run the setup script:  
-`./setup`  
-4. Run the server:  
-`./run`  
+3. Run the setup script (remember to add permisions: `chmod +x setup`):  
+`./setup.sh`  
 4. Test if it works:  
 Using httpie:  
 `http GET 127.0.0.1:8000/api/info`  
