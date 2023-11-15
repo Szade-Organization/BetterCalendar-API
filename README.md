@@ -4,7 +4,8 @@ To run:
 1. Clone the directory:  
 `git clone https://github.com/Szade-Organization/BetterCalendar-API.git`  
 2. Create a .env file looking like this:  
-> SECRET_KEY=your_secret_key  
+> SECRET_KEY=your_secret_key
+
 .env for the development purposes file has been sent to you.  
 Remember to never share the secret key, and not to push the .env file to the repository - it is already in .gitignore by default.
 3. Run the setup script (remember to add permisions: `chmod +x setup`):  
