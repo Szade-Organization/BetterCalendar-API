@@ -3,7 +3,7 @@
 To run:  
 1. Clone the directory:  
 `git clone https://github.com/Szade-Organization/BetterCalendar-API.git`  
-2. Create a .env file looking like this:  
+3. Create a .env file looking like this:  
 > SECRET_KEY=your_secret_key
 
 .env for the development purposes file has been sent to you.  
