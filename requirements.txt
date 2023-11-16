@@ -1,5 +1,9 @@
 asgiref==3.7.2
+<<<<<<< HEAD
 Django==4.1.13
+=======
+Django==4.2.7
+>>>>>>> master
 djangorestframework==3.14.0
 djongo==1.3.6
 dnspython==2.4.2

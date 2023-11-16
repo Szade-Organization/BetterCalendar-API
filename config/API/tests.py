@@ -7,7 +7,10 @@ class APIInformationViewTestCase(APITestCase):
         response = self.client.get('/api/invalid')
         self.assertEqual(response.status_code, 404)
         
+    def test_get_correct_status_code(self):
+        response = self.client.get('/api/info')
+        self.assertEqual(response.status_code, 200)    
+    
     def test_get_correct_data(self):
         response = self.client.get('/api/info')
-        self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data['api_name'], 'BetterCalendar-API')
