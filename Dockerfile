@@ -11,4 +11,4 @@ WORKDIR /code
 EXPOSE 8000
 
 ENTRYPOINT [ "python", "config/manage.py"]
-CMD ["runserver", "0.0.0.0:8000"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "core.wsgi:application"]
