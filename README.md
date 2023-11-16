@@ -1,18 +1,20 @@
 # BetterCalendar-API  
   
 To run:  
-1. Clone the directory:  
-`git clone https://github.com/Szade-Organization/BetterCalendar-API.git`
+1. Create a desired folder.
 2. Create a .env file:  
 .env for the development purposes file has been sent to you.  
 **Remember to never share the secret key, and not to push the .env file to the repository - it is already in .gitignore by default.**  
 Your .env file should look like this:  
-    > SECRET_KEY=your_secret_key
+    > SECRET_KEY=your_secret_key  
+3. If you haven't login to ghcr from docker:  
+   `docker login ghcr.io`  
+   Remember you have to use your github token.  
+4. Download/Copy paste the setup.sh script and add proper permissions (`chmod +x setup`).  
+5. Run the setup script.  
+    `./setup.sh`
 
-4. Run the setup script (remember to add permisions: `chmod +x setup`):  
-`./setup.sh`
-
-5. Test if it works:  
+6. Test if it works:  
 Using httpie:  
 `http GET 127.0.0.1:8000/api/info`  
     > HTTP/1.1 200 OK  
@@ -33,12 +35,5 @@ Using httpie:
     >     "version": "0.0.1"  
     > }
     
-    You can also use other methods such as fetch or curl.
-            
-
-
-If you want to update or reinstall the app use:  
-`./setup --rebuild` or `./setup -r`  
-**Warning! The previous version will be lost, as this overrides it.**  
-  
-There is also a `./setup -h` or `./setup --help` flag for displaying help.  
+    You can also use other methods such as curl:
+   `curl -H 'Accept: application/json; indent=4' http://127.0.0.1:8000/api/info`
