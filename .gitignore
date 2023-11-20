@@ -1,2 +1,4 @@
 .env
 .venv
+config/API/migrations/
+__pycache__
