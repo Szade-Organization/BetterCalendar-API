@@ -19,7 +19,7 @@ jobs:
         password: ${{ secrets.GITHUB_TOKEN }}
     - name: Build the Docker Image
       run: |
-            docker buildx build -t ghcr.io/Szade-Organization/BetterCalendar-API:latest
+            docker buildx build -t ghcr.io/Szade-Organization/BetterCalendar-API:latest .
             docker run ghcr.io/Szade-Organization/BetterCalendar-API:latest
             docker push ghcr.io/Szade-Organization/BetterCalendar-API:latest
     
