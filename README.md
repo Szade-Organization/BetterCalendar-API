@@ -8,7 +8,7 @@ To run:
 Your .env file should look like this:  
     > SECRET_KEY=your_secret_key  
 3. If you haven't login to ghcr from docker:  
-   `docker login ghcr.io`  
+   `docker login ghcr.io`   
    Remember you have to use your github token.  
 4. Download/Copy paste the setup.sh script and add proper permissions (`chmod +x setup`).  
 5. Run the setup script.  
