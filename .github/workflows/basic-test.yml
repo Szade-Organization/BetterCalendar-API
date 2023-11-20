@@ -26,5 +26,6 @@ jobs:
     - name: Run basic test
       env:
         SECRET_KEY: ${{ secrets.SECRET_KEY}}
+        BC_DB_CONNECTION_STRING: ${{secrets.DB_CONNECTION_STRING}}
       run: |
         python config/manage.py test API.tests.APIInformationViewTestCase
