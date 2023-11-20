@@ -20,6 +20,6 @@ jobs:
     - name: Build the Docker Image
       run: |
             docker buildx build -t ghcr.io/szade-organization/bettercalendar-api:latest .
-            docker run -e ${{ secrets.SECRET_KEY }} ghcr.io/szade-organization/bettercalendar-api:latest 
+            docker run -itd -e SECRET_KEY='${{ secrets.SECRET_KEY }}' ghcr.io/szade-organization/bettercalendar-api:latest 
             docker push ghcr.io/szade-organization/bettercalendar-api:latest
     
