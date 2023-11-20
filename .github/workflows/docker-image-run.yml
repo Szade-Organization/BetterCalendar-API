@@ -1,9 +1,9 @@
-name: Docker Image CI
+name: Docker Image Run
 
 on:
   pull_request:
     branches:
-      -master***
+    - master**
 
 jobs:
   publish-docker-image:
