@@ -27,4 +27,5 @@ jobs:
       env:
         SECRET_KEY: ${{ secrets.SECRET_KEY}}
       run: |
-        python config/manage.py test
+        cd config
+        python manage.py test
