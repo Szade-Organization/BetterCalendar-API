@@ -6,7 +6,8 @@ To run:
 .env for the development purposes file has been sent to you.  
 **Remember to never share the secret key, and not to push the .env file to the repository - it is already in .gitignore by default.**  
 Your .env file should look like this:  
-    > SECRET_KEY=your_secret_key  
+    > SECRET_KEY=your_secret_key
+    > BC_DB_CONNECTION_STRING=your_connection_string
 3. If you haven't login to ghcr from docker:  
    `docker login ghcr.io`  
    Remember you have to use your github token.  
