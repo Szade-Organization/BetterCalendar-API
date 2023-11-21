@@ -26,5 +26,5 @@ class APIDBTestView(APIView):
         return Response(status=status.HTTP_200_OK)
 
     def get(self, request):
-        data = UserData.objects.all().values()
+        data = UserData.objects.all().filter(user_name__exact="testuser").values()
         return Response(data, status=status.HTTP_200_OK)
