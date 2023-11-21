@@ -19,6 +19,13 @@ else
     echo -e "SECRET_KEY not found in .env file${COLOR_OFF}"
     exit 1
 fi
+if BC_DB_CONNECTION_STRING=`cat .env | grep BC_DB_CONNECTION_STRING | cut -b 25-` ; then
+    :
+else
+    echo -e "${RED}ERROR:"
+    echo -e "BC_DB_CONNECTION_STRING not found in .env file${COLOR_OFF}"
+    exit 1
+fi
 
 if docker pull ghcr.io/szade-organization/bettercalendar-api:latest ; then
     :
@@ -32,7 +39,7 @@ fi
 
 docker rm better-calendar-api
 
-if docker run -itd -e SECRET_KEY=$SECRET_KEY -p 8000:8000 --name better-calendar-api ghcr.io/szade-organization/bettercalendar-api ; then
+if docker run -itd -e SECRET_KEY=$SECRET_KEY -e BC_DB_CONNECTION_STRING=$BC_DB_CONNECTION_STRING -p 8000:8000 --name better-calendar-api ghcr.io/szade-organization/bettercalendar-api ; then
     :
 else
     echo -e "${RED}Docker run failed!${COLOR_OFF}"
