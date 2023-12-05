@@ -7,6 +7,7 @@ To run:
 **Remember to never share the secret key, and not to push the .env file to the repository - it is already in .gitignore by default.**  
 Your .env file should look like this:  
     > SECRET_KEY=your_secret_key  
+    > BC_DB_CONNECTION_STRING=your_connection_string
 3. If you haven't login to ghcr from docker:  
    `docker login ghcr.io`  
    Remember you have to use your github token.  
@@ -35,5 +36,5 @@ Using httpie:
     >     "version": "0.0.1"  
     > }
     
-    You can also use other methods such as curl:
+    You can also use other methods such as curl:  
    `curl -H 'Accept: application/json; indent=4' http://127.0.0.1:8000/api/info`
