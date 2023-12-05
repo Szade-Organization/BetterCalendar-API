@@ -2,8 +2,9 @@ name: API full test
 
 on:
   pull_request:
-    branches:
-    - master**
+    branches: []
+  push:
+    branches: []
 
 jobs:
   build:
