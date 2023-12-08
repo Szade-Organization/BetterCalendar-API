@@ -6,6 +6,17 @@ from API.models import *
 
 
 class Command(BaseCommand):
+    """
+    This command generates or deletes fake data for the API.
+    If the specified number of model is greater than the number of existing models, the command creates new models.
+    If the specified number of model is less than the number of existing models, the command deletes existing models.
+    Arguments:
+    -u, --users: Number of users to create.
+    -c, --categories: Number of categories to create.
+    -a, --activities: Number of activities to create.
+    Usage:
+    python manage.py populate -u 10 -c 5 -a 100
+    """
     def add_arguments(self, parser):
         parser.add_argument('-u', '--users', type=int,
                             help='Number of users to create.')
