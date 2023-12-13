@@ -101,7 +101,7 @@ DATABASES = {
         'ENFORCE_SCHEMA': False,
         'CLIENT': {
             'host': os.environ["BC_DB_CONNECTION_STRING"]
-        }  
+        }
     },
 }
 
@@ -124,6 +124,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Set custom user model
+
+AUTH_USER_MODEL = "API.User"
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
