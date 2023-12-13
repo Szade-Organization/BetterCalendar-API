@@ -1,10 +1,14 @@
 from rest_framework import serializers
+from .models import *
 
-from .models import UserData
 
-class UserDataSerializer(serializers.ModelSerializer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = UserData
-        fields = ('user_name', 'e_mail')
-    
+        model = Category
+        fields = '__all__'
 
+
+class ActivitySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Activity
+        fields = '__all__'
