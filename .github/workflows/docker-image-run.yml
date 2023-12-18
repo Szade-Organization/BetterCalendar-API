@@ -1,4 +1,4 @@
-name: Docker Image Run
+name: Test Docker Image
 
 on:
   pull_request:
@@ -6,7 +6,8 @@ on:
     - master**
 
 jobs:
-  publish-docker-image:
+  test-docker-image:
+    needs: Run-tests
     runs-on: ubuntu-latest
     steps: 
     - uses: actions/checkout@v3
