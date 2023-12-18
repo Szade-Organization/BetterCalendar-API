@@ -3,6 +3,7 @@ name: Test and Report to Azure Boards
 on:
   pull_request:
     branches: [main]  # Adjust this to your main branch name
+  workflow_dispatch:
 
 jobs:
   build:
