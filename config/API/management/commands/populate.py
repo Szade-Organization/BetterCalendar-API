@@ -33,10 +33,10 @@ class Command(BaseCommand):
         categories_count = Category.objects.count()
         activities_count = Activity.objects.count()
 
-        if users_desired is None and users_count == 0:
+        if (users_desired is None and users_count == 0) and (categories_desired is not None or activities_desired is not None):
             raise Exception(
                 'The users argument is empty and there are no users in the database. Please provide at least one user.')
-        if categories_desired is None and activities_desired is not None and categories_count == 0:
+        if (categories_desired is None and activities_desired is not None) and categories_count == 0:
             raise Exception(
                 'The categories argument is empty and there are no categories in the database. Please provide at least one category.')
 
@@ -57,6 +57,7 @@ class Command(BaseCommand):
                     print(f'Created user {user_username}')
                 print(f'Created {users_to_create} users.')
             elif users_to_create < 0:
+                print("deleting")
                 for _ in range(-users_to_create):
                     user = User.objects.all()[fake.random_int(
                         0, User.objects.count() - 1)]
