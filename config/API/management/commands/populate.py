@@ -64,6 +64,7 @@ class Command(BaseCommand):
                     user.delete()
                     print(f'Deleted user {user.username}')
                 print(f'Deleted {-users_to_create} users.')
+            users_count = User.objects.count()
 
         if categories_desired is not None:
             categories_dict = {
@@ -117,6 +118,7 @@ class Command(BaseCommand):
                     category.delete()
                     print(f'Deleted category {category.name}')
                 print(f'Deleted {-categories_to_create} categories.')
+            categories_count = Category.objects.count()
 
         if activities_desired is not None:
             activities_dict = {
@@ -222,7 +224,6 @@ class Command(BaseCommand):
                     activity_date_end = make_aware(fake.date_time_between(
                         start_date=activity_date_start, end_date='+1y'))
                     activity_length = activity_date_end - activity_date_start
-                    activity_is_planned = fake.boolean()
                     activity_importance_level = fake.random_element(
                         elements=('M', 'S', 'C', 'W', 'N'))
                     Activity.objects.create(
@@ -233,7 +234,6 @@ class Command(BaseCommand):
                         date_start=activity_date_start,
                         date_end=activity_date_end,
                         length=activity_length,
-                        is_planned=activity_is_planned,
                         importance_level=activity_importance_level
                     )
                     print(f'Created activity {activity_name}')
@@ -245,6 +245,7 @@ class Command(BaseCommand):
                     activity.delete()
                     print(f'Deleted activity {activity.name}')
                 print(f'Deleted {-activities_to_create} activities.')
+            activities_count = Activity.objects.count()
 
         print('Generating fake data completed.')
         print('User count: ' + str(User.objects.count()))

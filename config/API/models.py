@@ -1,6 +1,5 @@
 from djongo import models
 from django.contrib.auth.models import AbstractUser
-from django.core.exceptions import ValidationError
 
 
 class User(AbstractUser):
@@ -12,7 +11,7 @@ class Category(models.Model):
         ('M', 'Must'),
         ('S', 'Should'),
         ('C', 'Could'),
-        ('W', 'Would'),
+        ('W', 'Won\'t'),
         ('N', 'None'),
         ('n', 'None')
     ]
@@ -36,20 +35,20 @@ class Activity(models.Model):
     date_start = models.DateTimeField(null=True)
     date_end = models.DateTimeField(null=True)
     length = models.DurationField(null=True)
-    is_planned = models.BooleanField(default=False)
     importance_level = models.CharField(
         max_length=1, choices=Category.IMPORTANCE_LEVEL_CHOICES, default='n')
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
+    
+    @property
+    def is_planned(self):
+        return self.date_start is not None and self.date_end is not None
 
     def save(self, *args, **kwargs):
         if self.date_start and self.date_end:
-            if self.date_start > self.date_end:
-                raise ValidationError(
-                    'date_start must be less than or equal to date_end')
-    
-            self.length = self.date_end - self.date_start
-            self.is_planned = True
+            if self.length is None:
+                self.length = self.date_end - self.date_start
         if self.importance_level == 'n':
             self.importance_level = self.category.importance_level
         super(Activity, self).save(*args, **kwargs)
+
