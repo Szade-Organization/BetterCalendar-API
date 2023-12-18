@@ -41,27 +41,12 @@ jobs:
           python manage.py test
 
       - name: Report to Azure Boards
-        env:
-          AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
-          AZURE_DEVOPS_URL: https://dev.azure.com/01169631/mwo5  # Replace with your Azure DevOps organization URL
-          AZURE_DEVOPS_PROJECT: mwo5  # Replace with your Azure DevOps project name
-        run: |
-      - name: Report to Azure Boards
-        env:
-          AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
-          AZURE_DEVOPS_URL: https://dev.azure.com/01169631/
-          AZURE_DEVOPS_PROJECT: mwo5
-        run: |
-          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-          AZURE_DEVOPS_ORG="3b50229c-cd78-4588-9bcf-97b7629e2f0f"
-          AZURE_DEVOPS_PROJECT="mwo5"
-          WORK_ITEM_TYPE="Bug"
-          TITLE="Error running the test"
-          DESCRIPTION="Detailed description of the issue"
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
 
-          az login --service-principal -u $AZURE_DEVOPS_EXT_PAT -p "" --tenant $AZURE_DEVOPS_ORG
-          
-          # Create a new work item (bug)
-          az boards work-item create --type $WORK_ITEM_TYPE --project $AZURE_DEVOPS_PROJECT --title "$TITLE" --description "$DESCRIPTION"
+      - name: Create Work Item
+        run: |
+          az boards work-item create --type Bug --title "Error running the test" --description "Detailed description of the issue"
 
 
