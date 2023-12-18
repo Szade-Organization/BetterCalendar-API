@@ -49,8 +49,8 @@ jobs:
       - name: Report to Azure Boards
         env:
           AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
-          AZURE_DEVOPS_URL: https://dev.azure.com/your-organization/
-          AZURE_DEVOPS_PROJECT: your-project-name
+          AZURE_DEVOPS_URL: https://dev.azure.com/01169631/
+          AZURE_DEVOPS_PROJECT: mwo5
         run: |
           # Use a tool or script to report errors to Azure Boards
           # For example, you can use the Azure CLI to create a work item (bug)
