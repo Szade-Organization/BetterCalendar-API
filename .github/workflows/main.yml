@@ -25,7 +25,7 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.10.0
         with:
-          mongodb-version: ${{ matrix.mongodb-version }}
+          mongodb-version: '7.0.4'
           mongodb-username: user
           mongodb-password: password
       - name: Run tests
