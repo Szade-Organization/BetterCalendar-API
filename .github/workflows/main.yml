@@ -47,8 +47,8 @@ jobs:
           OrganizationName: "01169631"
           PAT: "PAT"
           ProjectName: "mwo5"
-          AreaPath: "mwo5"
-          IterationPath: ""
+          AreaPath: "MWO5 Tests failed!"
+          IterationPath: "/config/manage.py test"
           GithubToken: "GithubToken"
           WorkflowFileName: "main.yml"
         env:
