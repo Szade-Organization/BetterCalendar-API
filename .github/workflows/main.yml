@@ -40,8 +40,9 @@ jobs:
           cd config
           python manage.py test
 
-      - name: Report to Azure Boards
-        uses: Azure/login@v1
+      - name: Azure Login
+        uses: Azure/login@v1.5.1
+            
         with:
           creds: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
 
