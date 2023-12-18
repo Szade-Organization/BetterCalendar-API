@@ -22,12 +22,20 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.10.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version }}
+          mongodb-username: user
+          mongodb-password: password
       - name: Run tests
         env:
           AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
           AZURE_DEVOPS_URL: https://dev.azure.com/01169631/mwo5  # Replace with your Azure DevOps organization URL
           AZURE_DEVOPS_PROJECT: mwo5 # Replace with your Azure DevOps project name
+          SECRET_KEY: ${{ secrets.SECRET_KEY}}
+          BC_DB_CONNECTION_STRING: mongodb://user:password@localhost/?retryWrites=true&w=majority
+          
         run: |
           cd config
           python manage.py test
