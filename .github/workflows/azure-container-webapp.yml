@@ -38,6 +38,9 @@ permissions:
   contents: read
 
 jobs:
+  tests:
+    uses: ./.github/workflows/test.yml
+    secrets: inherit
   build:
     runs-on: ubuntu-latest
     permissions:
