@@ -52,6 +52,6 @@ jobs:
           WorkflowFileName: "main.yml"
         env:
           PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT}}
-          GithubToken: ${{ secrets.githubtoken}}
+          GithubToken: ${{ secrets.GITHUB_TOKEN}}
 
 
