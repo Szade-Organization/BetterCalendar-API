@@ -2,7 +2,7 @@ name: Test and Report to Azure Boards
 
 on:
   push:
-    branches: [main]  # Adjust this to your main branch name
+    branches: [master]  # Adjust this to your main branch name
   workflow_dispatch:
 
 jobs:
