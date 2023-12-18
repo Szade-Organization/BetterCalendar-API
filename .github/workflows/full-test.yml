@@ -2,8 +2,9 @@ name: API full test
 
 on:
   pull_request:
-    branches:
-    - master**
+    branches: []
+  push:
+    branches: []
 
 jobs:
   build:
@@ -12,6 +13,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.11]
+        mongodb-version: ['7.0.4']
 
     steps:
     - uses: actions/checkout@v3
@@ -23,10 +25,16 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+    - name: Start MongoDB
+      uses: supercharge/mongodb-github-action@1.10.0
+      with:
+        mongodb-version: ${{ matrix.mongodb-version }}
+        mongodb-username: user
+        mongodb-password: password
     - name: Run full test
       env:
         SECRET_KEY: ${{ secrets.SECRET_KEY}}
-        BC_DB_CONNECTION_STRING: ${{secrets.DB_CONNECTION_STRING}}
+        BC_DB_CONNECTION_STRING: mongodb://user:password@localhost/?retryWrites=true&w=majority
       run: |
         cd config
         python manage.py test
