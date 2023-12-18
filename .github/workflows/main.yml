@@ -52,14 +52,9 @@ jobs:
           AZURE_DEVOPS_URL: https://dev.azure.com/01169631/
           AZURE_DEVOPS_PROJECT: mwo5
         run: |
-          # Use a tool or script to report errors to Azure Boards
-          # For example, you can use the Azure CLI to create a work item (bug)
-          
-          # Install Azure CLI
+      - name: Report system
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-
-          # Replace the following placeholders with actual information
-          AZURE_DEVOPS_ORG="01169631"
+          AZURE_DEVOPS_ORG="3b50229c-cd78-4588-9bcf-97b7629e2f0f"
           AZURE_DEVOPS_PROJECT="mwo5"
           WORK_ITEM_TYPE="Bug"
           TITLE="Error running the test"
