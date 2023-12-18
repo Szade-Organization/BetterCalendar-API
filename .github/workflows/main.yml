@@ -39,19 +39,19 @@ jobs:
         run: |
           cd config
           python manage.py test
-
-      - name: Install Azure CLI
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y azure-cli
-
-      - name: Azure Login
-        uses: Azure/login@v1.5.1
+      - name: The job has failed
+        uses: stefanstranger/azuredevops-bug-action@1.1
+        if: failure()
         with:
-          creds: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
-
-      - name: Create Work Item
-        run: |
-          az boards work-item create --type Bug --title "Error running the test" --description "Detailed description of the issue"
+          OrganizationName: "01169631"
+          PAT: "PAT"
+          ProjectName: "mwo5"
+          AreaPath: "mwo5"
+          IterationPath: ""
+          GithubToken: "GithubToken"
+          WorkflowFileName: "main.yml"
+        env:
+          PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT}}
+          GithubToken: ${{ secrets.githubtoken}}
 
 
