@@ -39,7 +39,7 @@ permissions:
 
 jobs:
   tests:
-    uses: ./.github/workflows/test.yml
+    uses: ./.github/workflows/main.yml
     secrets: inherit
   build:
     runs-on: ubuntu-latest
