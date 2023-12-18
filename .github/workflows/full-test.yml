@@ -34,7 +34,7 @@ jobs:
     - name: Run full test
       env:
         SECRET_KEY: ${{ secrets.SECRET_KEY}}
-        BC_DB_CONNECTION_STRING: ${{secrets.DB_CONNECTION_STRING}}
+        BC_DB_CONNECTION_STRING: mongodb://user:password@localhost/?retryWrites=true&w=majority
       run: |
         cd config
         python manage.py test
