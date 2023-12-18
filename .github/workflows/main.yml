@@ -1,9 +1,9 @@
 name: Test and Report to Azure Boards
 
 on:
-  push:
-    branches: [master]  # Adjust this to your main branch name
-  workflow_dispatch:
+  pull_request:
+    branches: []  # Adjust this to your main branch name
+  workflow_call:
 
 jobs:
   build:
