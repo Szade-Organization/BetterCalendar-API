@@ -1,0 +1,64 @@
+name: Test and Report to Azure Boards
+
+on:
+  pull_request:
+    branches: [main]  # Adjust this to your main branch name
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.11  # Adjust the Python version as needed
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        env:
+          AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
+          AZURE_DEVOPS_URL: https://dev.azure.com/01169631/mwo5  # Replace with your Azure DevOps organization URL
+          AZURE_DEVOPS_PROJECT: mwo5 # Replace with your Azure DevOps project name
+        run: |
+          cd config
+          python manage.py test
+
+      - name: Report to Azure Boards
+        env:
+          AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
+          AZURE_DEVOPS_URL: https://dev.azure.com/01169631/mwo5  # Replace with your Azure DevOps organization URL
+          AZURE_DEVOPS_PROJECT: mwo5  # Replace with your Azure DevOps project name
+        run: |
+      - name: Report to Azure Boards
+        env:
+          AZURE_DEVOPS_EXT_PAT: ${{ secrets.AZURE_DEVOPS_EXT_PAT }}
+          AZURE_DEVOPS_URL: https://dev.azure.com/your-organization/
+          AZURE_DEVOPS_PROJECT: your-project-name
+        run: |
+          # Use a tool or script to report errors to Azure Boards
+          # For example, you can use the Azure CLI to create a work item (bug)
+          
+          # Install Azure CLI
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
+          # Replace the following placeholders with actual information
+          AZURE_DEVOPS_ORG="01169631"
+          AZURE_DEVOPS_PROJECT="mwo5"
+          WORK_ITEM_TYPE="Bug"
+          TITLE="Error running the test"
+          DESCRIPTION="Detailed description of the issue"
+
+          az login --service-principal -u $AZURE_DEVOPS_EXT_PAT -p "" --tenant $AZURE_DEVOPS_ORG
+          
+          # Create a new work item (bug)
+          az boards work-item create --type $WORK_ITEM_TYPE --project $AZURE_DEVOPS_PROJECT --title "$TITLE" --description "$DESCRIPTION"
+
+
