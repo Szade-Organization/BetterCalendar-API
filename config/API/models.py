@@ -14,7 +14,7 @@ class Category(models.Model):
         ('C', 'Could'),
         ('W', 'Would'),
         ('N', 'None'),
-        ('n', 'DefaultNone')
+        ('n', 'None')
     ]
     name = models.CharField(max_length=128)
     user = models.ForeignKey(to=User, on_delete=models.CASCADE)
@@ -47,6 +47,7 @@ class Activity(models.Model):
             if self.date_start > self.date_end:
                 raise ValidationError(
                     'date_start must be less than or equal to date_end')
+    
             self.length = self.date_end - self.date_start
             self.is_planned = True
         if self.importance_level == 'n':
