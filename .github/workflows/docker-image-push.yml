@@ -5,7 +5,11 @@ on:
     branches: [master]
     
 jobs:
+  test-image:
+    uses: ./.github/workflows/docker-image-run.yml
+    secrets: inherit
   publish-docker-image:
+    needs: test-image
     runs-on: ubuntu-latest
     steps: 
     - uses: actions/checkout@v3
