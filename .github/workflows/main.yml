@@ -52,7 +52,6 @@ jobs:
           AZURE_DEVOPS_URL: https://dev.azure.com/01169631/
           AZURE_DEVOPS_PROJECT: mwo5
         run: |
-      - name: Report system
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
           AZURE_DEVOPS_ORG="3b50229c-cd78-4588-9bcf-97b7629e2f0f"
           AZURE_DEVOPS_PROJECT="mwo5"
