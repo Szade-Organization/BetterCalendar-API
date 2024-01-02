@@ -1,4 +1,8 @@
-# BetterCalendar-API  
+# BetterCalendar-API
+![](https://github.com/Szade-Organization/BetterCalendar-API/actions/workflows/full-test.yml/badge.svg)
+![](https://github.com/Szade-Organization/BetterCalendar-API/actions/workflows/docker-image-push.yml/badge.svg)
+![](https://github.com/Szade-Organization/BetterCalendar-API/actions/workflows/test.yml/badge.svg)
+![](https://github.com/Szade-Organization/BetterCalendar-API/actions/workflows/docker-image-run.yml/badge.svg)
   
 To run:  
 1. Create a desired folder.
