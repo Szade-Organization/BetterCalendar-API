@@ -17,6 +17,7 @@ class Command(BaseCommand):
     Usage:
     python manage.py populate -u 10 -c 5 -a 100
     """
+
     def add_arguments(self, parser):
         parser.add_argument('-u', '--users', type=int,
                             help='Number of users to create.')
@@ -29,21 +30,18 @@ class Command(BaseCommand):
         users_desired = kwargs['users']
         categories_desired = kwargs['categories']
         activities_desired = kwargs['activities']
-        users_count = User.objects.count()
-        categories_count = Category.objects.count()
-        activities_count = Activity.objects.count()
 
-        if users_desired is None and users_count == 0:
+        if (users_desired is None and User.objects.count() == 0) and (categories_desired is not None or activities_desired is not None):
             raise Exception(
                 'The users argument is empty and there are no users in the database. Please provide at least one user.')
-        if categories_desired is None and activities_desired is not None and categories_count == 0:
+        if (categories_desired is None and activities_desired is not None) and Category.objects.count() == 0:
             raise Exception(
                 'The categories argument is empty and there are no categories in the database. Please provide at least one category.')
 
         fake = Faker()
 
         if users_desired is not None:
-            users_to_create = users_desired - users_count
+            users_to_create = users_desired - User.objects.count()
             if users_to_create > 0:
                 for _ in range(users_to_create):
                     user_username = fake.user_name()
@@ -57,9 +55,13 @@ class Command(BaseCommand):
                     print(f'Created user {user_username}')
                 print(f'Created {users_to_create} users.')
             elif users_to_create < 0:
+                print("deleting")
                 for _ in range(-users_to_create):
-                    user = User.objects.all()[fake.random_int(
-                        0, User.objects.count() - 1)]
+                    if User.objects.count() > 1:
+                        user = User.objects.all()[fake.random_int(
+                            0, User.objects.count() - 1)]
+                    else:
+                        user = User.objects.all()[0]
                     user.delete()
                     print(f'Deleted user {user.username}')
                 print(f'Deleted {-users_to_create} users.')
@@ -87,13 +89,13 @@ class Command(BaseCommand):
                 'finance': 'Managing personal finances and budgeting.',
                 'yoga': 'Practicing yoga for physical and mental health.'
             }
-            categories_to_create = categories_desired - categories_count
+            categories_to_create = categories_desired - Category.objects.count()
             if categories_to_create > 0:
                 for _ in range(categories_to_create):
                     category_name = list(categories_dict.keys())[
                         fake.random_int(0, len(categories_dict) - 1)]
                     category_user = User.objects.all(
-                    )[fake.random_int(0, users_count - 1)]
+                    )[fake.random_int(0, User.objects.count() - 1)]
                     category_description = categories_dict[category_name]
                     category_color = fake.color_name()
                     category_icon = fake.file_name(extension='svg')
@@ -111,8 +113,11 @@ class Command(BaseCommand):
                 print(f'Created {categories_to_create} categories.')
             elif categories_to_create < 0:
                 for _ in range(-categories_to_create):
-                    category = Category.objects.all()[fake.random_int(
-                        0, Category.objects.count() - 1)]
+                    if Category.objects.count() > 1:
+                        category = Category.objects.all()[fake.random_int(
+                            0, Category.objects.count() - 1)]
+                    else:
+                        category = Category.objects.all()[0]
                     category.delete()
                     print(f'Deleted category {category.name}')
                 print(f'Deleted {-categories_to_create} categories.')
@@ -206,22 +211,21 @@ class Command(BaseCommand):
                 "Online cooking class": "Participating in a virtual cooking class to learn new recipes.",
                 "Online board game night": "Playing board games with friends through online platforms.",
             }
-            activities_to_create = activities_desired - activities_count
+            activities_to_create = activities_desired - Activity.objects.count()
             if activities_to_create > 0:
                 for _ in range(activities_to_create):
                     activity_name = list(activities_dict.keys())[
                         fake.random_int(0, len(activities_dict) - 1)]
                     activity_user = User.objects.all(
-                    )[fake.random_int(0, users_count - 1)]
+                    )[fake.random_int(0, User.objects.count() - 1)]
                     activity_category = Category.objects.all(
-                    )[fake.random_int(0, categories_count - 1)]
+                    )[fake.random_int(0, Category.objects.count() - 1)]
                     activity_description = activities_dict[activity_name]
                     activity_date_start = make_aware(
                         fake.date_time_between(start_date='-1y', end_date='+1y'))
                     activity_date_end = make_aware(fake.date_time_between(
                         start_date=activity_date_start, end_date='+1y'))
                     activity_length = activity_date_end - activity_date_start
-                    activity_is_planned = fake.boolean()
                     activity_importance_level = fake.random_element(
                         elements=('M', 'S', 'C', 'W', 'N'))
                     Activity.objects.create(
@@ -232,15 +236,17 @@ class Command(BaseCommand):
                         date_start=activity_date_start,
                         date_end=activity_date_end,
                         length=activity_length,
-                        is_planned=activity_is_planned,
                         importance_level=activity_importance_level
                     )
                     print(f'Created activity {activity_name}')
                 print(f'Created {activities_to_create} activities.')
             elif activities_to_create < 0:
                 for _ in range(-activities_to_create):
-                    activity = Activity.objects.all()[fake.random_int(
-                        0, Activity.objects.count() - 1)]
+                    if Activity.objects.count() > 1:
+                        activity = Activity.objects.all()[fake.random_int(
+                            0, Activity.objects.count() - 1)]
+                    else:
+                        activity = Activity.objects.all()[0]
                     activity.delete()
                     print(f'Deleted activity {activity.name}')
                 print(f'Deleted {-activities_to_create} activities.')
