@@ -1,13 +1,14 @@
-name: API full test
+name: Run tests
 
 on:
   pull_request:
     branches: []
   push:
     branches: []
+  workflow_call:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
