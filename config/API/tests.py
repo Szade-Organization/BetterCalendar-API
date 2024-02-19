@@ -1,6 +1,7 @@
 import datetime
 from django.test import TestCase
 from rest_framework.test import APITestCase
+from django.core.management import call_command
 
 from .models import *
 
