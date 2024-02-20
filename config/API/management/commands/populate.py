@@ -1,3 +1,4 @@
+from datetime import timedelta
 from faker import Faker
 from django.core.management.base import BaseCommand
 from django.utils.timezone import make_aware
@@ -224,7 +225,7 @@ class Command(BaseCommand):
                     activity_date_start = make_aware(
                         fake.date_time_between(start_date='-1y', end_date='+1y'))
                     activity_date_end = make_aware(fake.date_time_between(
-                        start_date=activity_date_start, end_date='+1y'))
+                        start_date=activity_date_start, end_date=activity_date_start + timedelta(hours=6)))
                     activity_length = activity_date_end - activity_date_start
                     activity_importance_level = fake.random_element(
                         elements=('M', 'S', 'C', 'W', 'N'))
