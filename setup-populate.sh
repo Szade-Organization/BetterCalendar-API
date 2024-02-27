@@ -20,5 +20,5 @@ else
     echo "Database population failed"
     exit 1
 fi
-export POPULATE_INITIED=1
+export POPULATE_INITIALIZED=1
 exit 1
