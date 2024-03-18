@@ -1,15 +1,18 @@
-from django.shortcuts import render
+from django.contrib.auth import login
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, viewsets
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import permissions
+from rest_framework.authtoken.serializers import AuthTokenSerializer
+
+from knox.views import LoginView as KnoxLoginView
 from drf_yasg.utils import swagger_auto_schema
 
 from .models import *
 from .serializers import *
 from .filters import *
-
-# Create your views here.
 
 
 @swagger_auto_schema(method='get')
@@ -46,3 +49,16 @@ class ActivityViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
     filterset_class = ActivityFilter
+
+
+class LoginView(KnoxLoginView):
+    # login view extending KnoxLoginView
+    serializer_class = AuthSerializer
+    permission_classes = (permissions.AllowAny,)
+
+    def post(self, request, format=None):
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        login(request, user)
+        return super(LoginView, self).post(request, format=None)

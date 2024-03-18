@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
+from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -42,7 +44,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'django_filters',
-    'corsheaders'
+    'corsheaders',
+    'rest_framework',
+    'knox',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +61,32 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'knox.auth.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication'
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAdminUser',
+    ],
+}
+
+REST_KNOX = {
+    'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
+    # By default, it is set to 64 characters (this shouldn't need changing).
+    'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+    # The default is 10 hours i.e., timedelta(hours=10)).
+    'TOKEN_TTL': timedelta(minutes=45),
+    'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+    # By default, this option is disabled and set to None -- thus no limit.
+    'TOKEN_LIMIT_PER_USER': None,
+    # This defines if the token expiry time is extended by TOKEN_TTL each time the token is used.
+    'AUTO_REFRESH': False,
+    'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
+}
 
 TEMPLATES = [
     {
@@ -91,6 +121,11 @@ SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Basic': {
             'type': 'basic'
+        },
+        'Token': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
         }
     }
 }
