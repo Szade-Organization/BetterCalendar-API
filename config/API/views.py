@@ -55,7 +55,7 @@ class ActivityViewSet(viewsets.ModelViewSet):
 class LoginView(KnoxLoginView):
     serializer_class = AuthSerializer
     permission_classes = (permissions.AllowAny,)
-    
+
     @swagger_auto_schema(request_body=AuthTokenSerializer)
     def post(self, request, format=None):
         serializer = AuthTokenSerializer(data=request.data)
