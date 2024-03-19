@@ -8,19 +8,11 @@ from django.contrib.auth import authenticate
 
 
 class CategorySerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
-    
     class Meta:
         model = Category
-        fields = '__all__' 
-
+        fields = '__all__'
 
 class ActivitySerializer(serializers.ModelSerializer):
-    user = serializers.HiddenField(
-        default=serializers.CurrentUserDefault()
-    )
     class Meta:
         model = Activity
         fields = '__all__'
