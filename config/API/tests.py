@@ -21,7 +21,7 @@ class APIInformationViewTestCase(APITestCase):
 
 class CategoryViewSetTestCase(APITestCase):
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(username='testuser')
+        cls.user = User.objects.create_user(username='testuser', password='testuser')
         cls.category = Category.objects.create(
             name='test_category', user=cls.user)
 
