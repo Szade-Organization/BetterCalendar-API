@@ -51,11 +51,12 @@ class ActivityViewSet(viewsets.ModelViewSet):
     filterset_class = ActivityFilter
 
 
+
 class LoginView(KnoxLoginView):
-    # login view extending KnoxLoginView
     serializer_class = AuthSerializer
     permission_classes = (permissions.AllowAny,)
-
+    
+    @swagger_auto_schema(request_body=AuthTokenSerializer)
     def post(self, request, format=None):
         serializer = AuthTokenSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
