@@ -41,6 +41,10 @@ class CategoryViewSet(viewsets.ModelViewSet):
     filterset_fields = '__all__'
     filterset_class = CategoryFilter
 
+    def get_queryset(self):
+        queryset = Category.objects.filter(user = self.request.user)
+        return queryset
+
 
 class ActivityViewSet(viewsets.ModelViewSet):
     """
@@ -51,6 +55,10 @@ class ActivityViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = '__all__'
     filterset_class = ActivityFilter
+
+    def get_queryset(self):
+        queryset = Activity.objects.filter(user = self.request.user)
+        return queryset
 
 
 
