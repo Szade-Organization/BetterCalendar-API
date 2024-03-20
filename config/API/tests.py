@@ -3,6 +3,7 @@ from django.test import TestCase
 from rest_framework.test import APITestCase
 
 from .models import *
+from knox.models import AuthToken
 
 
 class APIInformationViewTestCase(APITestCase):
@@ -20,8 +21,14 @@ class APIInformationViewTestCase(APITestCase):
 
 
 class CategoryViewSetTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.get(username='testuser')
+        _token_instance, self.token = AuthToken.objects.create(user=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+        
+    @classmethod
     def setUpTestData(cls):
-        cls.user = User.objects.create_user(username='testuser', password='testuser')
+        cls.user = User.objects.create_user(username='testuser')
         cls.category = Category.objects.create(
             name='test_category', user=cls.user)
 
@@ -67,6 +74,12 @@ class CategoryViewSetTestCase(APITestCase):
 
 
 class ActivityViewSetTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.get(username='testuser')
+        _token_instance, self.token = AuthToken.objects.create(user=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)    
+    
+    @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username='testuser')
         cls.category = Category.objects.create(
