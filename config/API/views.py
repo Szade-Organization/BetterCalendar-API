@@ -17,6 +17,8 @@ from .filters import *
 
 @swagger_auto_schema(method='get')
 class APIInformationView(APIView):
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
     def get(self, request):
         """
         List basic information about the API.
@@ -55,6 +57,7 @@ class ActivityViewSet(viewsets.ModelViewSet):
 class LoginView(KnoxLoginView):
     serializer_class = AuthSerializer
     permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
 
     @swagger_auto_schema(request_body=AuthTokenSerializer)
     def post(self, request, format=None):
