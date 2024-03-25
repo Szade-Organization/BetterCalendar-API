@@ -32,6 +32,11 @@ ALLOWED_HOSTS = []
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# FRONTEND_HOST = os.environ["FRONTEND_HOST"]
+FRONTEND_HOST = "localhost:3000"
+# EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
+EMAIL_ADDRESS = "no-reply@example.com"
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,6 +52,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'knox',
+    'rest_registration',
 ]
 
 MIDDLEWARE = [
@@ -193,3 +199,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MIGRATION_MODULES = {
     'knox': 'API.knox_migrations',
 }
+
+REST_REGISTRATION = {
+    'REGISTER_VERIFICATION_URL': str(FRONTEND_HOST) + '/verify-user/',
+    'RESET_PASSWORD_VERIFICATION_URL': str(FRONTEND_HOST) + '/reset-password/',
+    'REGISTER_EMAIL_VERIFICATION_URL': str(FRONTEND_HOST) + '/verify-email/',
+    'VERIFICATION_FROM_EMAIL': str(EMAIL_ADDRESS),
+    'REGISTER_VERIFICATION_AUTO_LOGIN': True,
+    'REGISTER_VERIFICATION_ONE_TIME_USE': True,
+}
+
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = BASE_DIR / "../emails"
