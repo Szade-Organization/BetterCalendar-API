@@ -3,6 +3,7 @@ from urllib.parse import parse_qs, urlparse
 import django
 from django.test import TestCase
 from rest_framework.test import APITestCase
+from django.core.management import call_command
 
 from .models import *
 from knox.models import AuthToken
