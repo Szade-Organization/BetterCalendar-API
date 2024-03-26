@@ -32,6 +32,11 @@ ALLOWED_HOSTS = []
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# FRONTEND_HOST = os.environ["FRONTEND_HOST"]
+FRONTEND_HOST = "localhost:3000"
+# EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
+EMAIL_ADDRESS = "no-reply@example.com"
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -47,6 +52,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'knox',
+    'rest_registration',
 ]
 
 MIDDLEWARE = [
@@ -75,15 +81,9 @@ REST_FRAMEWORK = {
 
 REST_KNOX = {
     'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
-    # By default, it is set to 64 characters (this shouldn't need changing).
-    'AUTH_TOKEN_CHARACTER_LENGTH': 64,
-    # The default is 10 hours i.e., timedelta(hours=10)).
-    'TOKEN_TTL': timedelta(minutes=45),
+    'TOKEN_TTL': timedelta(hours=72),
     'USER_SERIALIZER': 'knox.serializers.UserSerializer',
-    # By default, this option is disabled and set to None -- thus no limit.
-    'TOKEN_LIMIT_PER_USER': None,
-    # This defines if the token expiry time is extended by TOKEN_TTL each time the token is used.
-    'AUTO_REFRESH': False,
+    'AUTO_REFRESH': True,
     'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
 }
 
@@ -193,3 +193,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 MIGRATION_MODULES = {
     'knox': 'API.knox_migrations',
 }
+
+REST_REGISTRATION = {
+    'REGISTER_VERIFICATION_URL': str(FRONTEND_HOST) + '/verify-user/',
+    'RESET_PASSWORD_VERIFICATION_URL': str(FRONTEND_HOST) + '/reset-password/',
+    'REGISTER_EMAIL_VERIFICATION_URL': str(FRONTEND_HOST) + '/verify-email/',
+    'VERIFICATION_FROM_EMAIL': str(EMAIL_ADDRESS),
+    'REGISTER_VERIFICATION_AUTO_LOGIN': True,
+    'REGISTER_VERIFICATION_ONE_TIME_USE': True,
+}
+
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = BASE_DIR / "../emails"

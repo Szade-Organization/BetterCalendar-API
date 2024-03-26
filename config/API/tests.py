@@ -1,4 +1,6 @@
 import datetime
+from urllib.parse import parse_qs, urlparse
+import django
 from django.test import TestCase
 from rest_framework.test import APITestCase
 
@@ -25,7 +27,7 @@ class CategoryViewSetTestCase(APITestCase):
         self.user = User.objects.get(username='testuser')
         _token_instance, self.token = AuthToken.objects.create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
-        
+
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username='testuser')
@@ -77,8 +79,8 @@ class ActivityViewSetTestCase(APITestCase):
     def setUp(self):
         self.user = User.objects.get(username='testuser')
         _token_instance, self.token = AuthToken.objects.create(user=self.user)
-        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)    
-    
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+
     @classmethod
     def setUpTestData(cls):
         cls.user = User.objects.create_user(username='testuser')
@@ -187,3 +189,149 @@ class ActivityViewSetTestCase(APITestCase):
         }
         response = self.client.post('/api/activity/', data)
         self.assertEqual(response.status_code, 400)
+
+
+class RegisterUserTestCase(APITestCase):
+    def test_should_register_user(self):
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword123',
+            'password_confirm': 'testpassword123',
+            'email': 'user@example.com',
+            'first_name': 'John',
+            'last_name': 'Doe'
+        }
+        response = self.client.post('/api/auth/register/', data)
+        self.assertEqual(response.status_code, 201)
+        self.assertTrue(User.objects.filter(username='testuser').exists())
+
+    def test_should_not_register_user_with_existing_username(self):
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword123',
+            'password_confirm': 'testpassword123',
+            'email': 'user@example.com',
+            'first_name': 'John',
+            'last_name': 'Doe'
+        }
+        _ = self.client.post('/api/auth/register/', data)
+        response = self.client.post('/api/auth/register/', data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['username'][0],
+                         'A user with that username already exists.')
+
+    def test_should_send_email_to_verify_registration(self):
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword123',
+            'password_confirm': 'testpassword123',
+            'email': 'user@example.com',
+            'first_name': 'John',
+            'last_name': 'Doe'
+        }
+        _ = self.client.post('/api/auth/register/', data)
+        email_content = django.core.mail.outbox[0].body
+        parsed_url = urlparse(email_content)
+        query_params = parse_qs(parsed_url.query)
+
+        verify_data = {
+            "user_id": query_params.get('user_id', [None])[0],
+            "timestamp": query_params.get('timestamp', [None])[0],
+            "signature": query_params.get('signature', [None])[0]
+        }
+
+        response = self.client.post(
+            '/api/auth/verify-registration/', verify_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['detail'], 'User verified successfully')
+        self.assertTrue(User.objects.get(username='testuser').is_active)
+        
+        
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword123'
+        }
+
+        response = self.client.post('/api/auth/login/', data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('token' in response.data)
+
+    def test_should_not_verify_user_with_invalid_data(self):
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword123',
+            'password_confirm': 'testpassword123',
+            'email': 'user@example.com',
+            'first_name': 'John',
+            'last_name': 'Doe'
+        }
+        _ = self.client.post('/api/auth/register/', data)
+
+        verify_data = {
+            "user_id": User.objects.get(username='testuser').id,
+            "timestamp": 1234124,
+            "signature": "invalid_signature"
+        }
+
+        response = self.client.post(
+            '/api/auth/verify-registration/', verify_data)
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data['detail'], 'Invalid signature')
+        self.assertFalse(User.objects.get(username='testuser').is_active)
+
+    def test_should_change_password(self):
+        data = {
+            'username': 'testuser',
+            'password': 'testpassword123',
+            'password_confirm': 'testpassword123',
+            'email': 'user@example.com',
+            'first_name': 'John',
+            'last_name': 'Doe'
+        }
+        _ = self.client.post('/api/auth/register/', data)
+        email_content = django.core.mail.outbox[0].body
+        parsed_url = urlparse(email_content)
+        query_params = parse_qs(parsed_url.query)
+
+        verify_data = {
+            "user_id": query_params.get('user_id', [None])[0],
+            "timestamp": query_params.get('timestamp', [None])[0],
+            "signature": query_params.get('signature', [None])[0]
+        }
+
+        response = self.client.post(
+            '/api/auth/verify-registration/', verify_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['detail'], 'User verified successfully')
+        self.assertTrue(User.objects.get(username='testuser').is_active)
+
+        change_password_data = {
+            'login': 'testuser',
+        }
+        _ = self.client.post(
+            '/api/auth/send-reset-password-link/', change_password_data)
+
+        email_content = django.core.mail.outbox[1].body
+        parsed_url = urlparse(email_content)
+        query_params = parse_qs(parsed_url.query)
+
+        change_password_data = {
+            "user_id": query_params.get('user_id', [None])[0],
+            "timestamp": query_params.get('timestamp', [None])[0],
+            "signature": query_params.get('signature', [None])[0],
+            "password": "newpassword123",
+        }
+
+        response = self.client.post(
+            '/api/auth/reset-password/', change_password_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['detail'], 'Reset password successful')
+
+        login_data = {
+            'username': 'testuser',
+            'password': 'newpassword123'
+        }
+
+        response = self.client.post('/api/auth/login/', login_data)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('token' in response.data)
