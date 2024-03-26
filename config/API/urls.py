@@ -37,3 +37,9 @@ urlpatterns = [
     path('auth/change-email/', rest_registration.register_email, name='change-email'),
     path('auth/verify-email/', rest_registration.verify_email, name='verify-email'),
 ]
+
+from django.conf import settings
+if settings.DEBUG:
+    urlpatterns += [
+        path('auth/create_test_user/', developmentUserCreate.as_view(), name='create-test-user'),
+    ]

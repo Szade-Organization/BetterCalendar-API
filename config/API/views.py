@@ -19,6 +19,7 @@ from .filters import *
 class APIInformationView(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = ()
+
     def get(self, request):
         """
         List basic information about the API.
@@ -53,7 +54,6 @@ class ActivityViewSet(viewsets.ModelViewSet):
     filterset_class = ActivityFilter
 
 
-
 class LoginView(KnoxLoginView):
     serializer_class = AuthSerializer
     permission_classes = (permissions.AllowAny,)
@@ -66,3 +66,30 @@ class LoginView(KnoxLoginView):
         user = serializer.validated_data['user']
         login(request, user)
         return super(LoginView, self).post(request, format=None)
+    
+from knox.models import AuthToken
+from django.conf import settings
+
+
+# TODO: Remove this function in production
+
+class developmentUserCreate(APIView):
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
+    serializer_class = UserSerializer
+    
+    @swagger_auto_schema(request_body=UserSerializer)
+    def post(self, request):
+        if not settings.DEBUG:
+            return Response({'error': 'This endpoint is only available in development mode'}, status=status.HTTP_403_FORBIDDEN)
+        serializer = UserSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.validated_data['email'] = serializer.validated_data.get('username') + '@example.com'
+        serializer.validated_data['is_active'] = True
+        user = serializer.save()
+        _, token = AuthToken.objects.create(user)
+        return Response({'token': 'Token ' + token}, status=status.HTTP_201_CREATED)
+        
+        
+    
+    
