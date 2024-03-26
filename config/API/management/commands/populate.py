@@ -2,6 +2,7 @@ from datetime import timedelta
 from faker import Faker
 from django.core.management.base import BaseCommand
 from django.utils.timezone import make_aware
+from django.db import transaction
 
 from API.models import *
 
@@ -15,6 +16,7 @@ class Command(BaseCommand):
     -u, --users: Number of users to create.
     -c, --categories: Number of categories to create.
     -a, --activities: Number of activities to create.
+    --verbose: Verbosity on or off.
     Usage:
     python manage.py populate -u 10 -c 5 -a 100
     """
@@ -26,233 +28,196 @@ class Command(BaseCommand):
                             help='Number of categories to create.')
         parser.add_argument('-a', '--activities', type=int,
                             help='Number of activities to create.')
+        parser.add_argument('--verbose', action='store_true', 
+                            help='Verbosity on or off.')
 
     def handle(self, *args, **kwargs):
         users_desired = kwargs['users']
         categories_desired = kwargs['categories']
         activities_desired = kwargs['activities']
+        verbosity = kwargs['verbose']
 
-        if (users_desired is None and User.objects.count() == 0) and (categories_desired is not None or activities_desired is not None):
+        if ((users_desired is None and User.objects.count() == 0) and (categories_desired is not None or activities_desired is not None)) or (users_desired == 0 and (categories_desired is not None or activities_desired is not None)):
             raise Exception(
                 'The users argument is empty and there are no users in the database. Please provide at least one user.')
-        if (categories_desired is None and activities_desired is not None) and Category.objects.count() == 0:
+        if ((categories_desired is None and activities_desired is not None) and Category.objects.count() == 0) or (categories_desired == 0 and activities_desired is not None):
             raise Exception(
                 'The categories argument is empty and there are no categories in the database. Please provide at least one category.')
 
         fake = Faker()
 
-        if users_desired is not None:
-            users_to_create = users_desired - User.objects.count()
-            if users_to_create > 0:
-                for _ in range(users_to_create):
-                    user_username = fake.user_name()
-                    user_email = fake.email()
-                    user_password = fake.password()
-                    User.objects.create_user(
-                        username=user_username,
-                        email=user_email,
-                        password=user_password
-                    )
-                    print(f'Created user {user_username}')
-                print(f'Created {users_to_create} users.')
-            elif users_to_create < 0:
-                print("deleting")
-                for _ in range(-users_to_create):
-                    if User.objects.count() > 1:
-                        user = User.objects.all()[fake.random_int(
-                            0, User.objects.count() - 1)]
-                    else:
-                        user = User.objects.all()[0]
-                    user.delete()
-                    print(f'Deleted user {user.username}')
-                print(f'Deleted {-users_to_create} users.')
-
-        if categories_desired is not None:
-            categories_dict = {
-                'studying': 'Engaging in learning activities in a specific subject or area.',
-                'exercise': 'Physical activity done for the purpose of improving health and fitness.',
-                'work': 'Tasks and activities related to professional or occupational responsibilities.',
-                'meeting': 'Gathering of individuals for discussion or collaboration on a specific topic.',
-                'socializing': 'Interacting with others for recreational or social purposes.',
-                'personal': 'Tasks and activities related to personal well-being and interests.',
-                'coding': 'Writing and debugging code for software development.',
-                'reading': 'Spending time with written material to gain knowledge or enjoyment.',
-                'writing': 'Creating written content, such as articles, stories, or blog posts.',
-                'meditation': 'Practicing mindfulness and relaxation techniques for mental well-being.',
-                'cooking': 'Preparing and cooking meals or recipes.',
-                'gardening': 'Cultivating and tending to plants and gardens.',
-                'volunteering': 'Contributing time and effort to a charitable cause or organization.',
-                'music': 'Engaging in musical activities, such as playing instruments or listening to music.',
-                'travel': 'Exploring new places and experiencing different cultures.',
-                'hobbies': 'Pursuing personal interests and recreational activities.',
-                'shopping': 'Purchasing goods and services for personal or household needs.',
-                'self-care': 'Engaging in activities that promote physical and mental well-being.',
-                'finance': 'Managing personal finances and budgeting.',
-                'yoga': 'Practicing yoga for physical and mental health.'
-            }
-            categories_to_create = categories_desired - Category.objects.count()
-            if categories_to_create > 0:
-                for _ in range(categories_to_create):
-                    category_name = list(categories_dict.keys())[
-                        fake.random_int(0, len(categories_dict) - 1)]
-                    category_user = User.objects.all(
-                    )[fake.random_int(0, User.objects.count() - 1)]
-                    category_description = categories_dict[category_name]
-                    category_color = fake.color_name()
-                    category_icon = fake.file_name(extension='svg')
-                    category_importance_level = fake.random_element(
-                        elements=('M', 'S', 'C', 'W', 'N'))
-                    Category.objects.create(
-                        name=category_name,
-                        user=category_user,
-                        description=category_description,
-                        color=category_color,
-                        icon=category_icon,
-                        importance_level=category_importance_level
-                    )
-                    print(f'Created category {category_name}')
-                print(f'Created {categories_to_create} categories.')
-            elif categories_to_create < 0:
-                for _ in range(-categories_to_create):
-                    if Category.objects.count() > 1:
-                        category = Category.objects.all()[fake.random_int(
-                            0, Category.objects.count() - 1)]
-                    else:
-                        category = Category.objects.all()[0]
-                    category.delete()
-                    print(f'Deleted category {category.name}')
-                print(f'Deleted {-categories_to_create} categories.')
-
-        if activities_desired is not None:
-            activities_dict = {
-                "Meeting with Andrew": "Meeting with Andrew Brown on Long Street.",
-                "Gym workout": "Strength training and cardio exercises at the gym.",
-                "Study group session": "Collaborative study session with classmates.",
-                "Client call": "Scheduled call with a client to discuss project details.",
-                "Lunch with friends": "Casual lunch outing with friends at a local restaurant.",
-                "Personal project work": "Working on personal projects or hobbies.",
-                "Team brainstorming": "Collaborative session to brainstorm ideas with the team.",
-                "Networking event": "Attending an event to network with professionals in the industry.",
-                "Family dinner": "Gathering with family for a shared meal at home.",
-                "Movie night": "Watching a movie or TV series for entertainment.",
-                "Volunteer work": "Participating in volunteer activities for a charitable cause.",
-                "Coffee meeting": "Meeting someone for a casual coffee discussion.",
-                "Home workout": "Exercising at home with bodyweight exercises or home gym equipment.",
-                "Board game night": "Playing board games with friends or family.",
-                "Webinar attendance": "Participating in an online webinar or virtual event.",
-                "Writing blog post": "Creating content for a personal or professional blog.",
-                "Grocery shopping": "Buying groceries and household essentials.",
-                "Doctor's appointment": "Scheduled visit to the doctor for a health check-up.",
-                "Photography session": "Engaging in photography and capturing images.",
-                "Online course": "Taking an online course to learn new skills or enhance knowledge.",
-                "Tech meetup": "Attending a technology-focused meetup or conference.",
-                "Cooking class": "Participating in a cooking class to learn new recipes.",
-                "Date night": "Planned evening with a significant other for a date.",
-                "Podcast recording": "Recording and producing content for a personal or professional podcast.",
-                "Home cleaning": "Cleaning and organizing the living space.",
-                "Book club meeting": "Discussion meeting with a book club to talk about a selected book.",
-                "Sprint planning": "Agile sprint planning session for project management.",
-                "Art exhibition": "Visiting an art exhibition or gallery for cultural enrichment.",
-                "Financial planning": "Reviewing and planning personal or business finances.",
-                "Game development": "Working on the development of a video or board game.",
-                "Social media management": "Managing and scheduling content for social media platforms.",
-                "Language learning": "Dedicating time to learn a new language or improve language skills.",
-                "Pet grooming": "Taking care of grooming needs for pets.",
-                "Science fair preparation": "Preparing for participation in a science fair or exhibition.",
-                "Home improvement": "Engaging in DIY home improvement projects.",
-                "Camping trip": "Planning and preparing for a camping trip.",
-                "Team building activity": "Participating in team-building exercises with colleagues.",
-                "DIY craft project": "Creating handmade crafts or DIY projects.",
-                "Job interview": "Attending a job interview for a potential employment opportunity.",
-                "Tech support for family": "Assisting family members with technical issues or support.",
-                "Salsa dance class": "Taking a dance class to learn salsa or other dance forms.",
-                "Product launch preparation": "Preparing for the launch of a new product or service.",
-                "Mindfulness meditation": "Practicing mindfulness meditation for mental well-being.",
-                "Gardening session": "Tending to the garden and planting new flowers or vegetables.",
-                "Home budgeting": "Reviewing and managing personal or household budget.",
-                "Virtual reality gaming": "Engaging in gaming using virtual reality technology.",
-                "Home office setup": "Organizing and setting up a productive home office space.",
-                "Charity run": "Participating in a charity run or marathon event.",
-                "Escape room experience": "Participating in an escape room challenge for entertainment.",
-                "Online multiplayer gaming": "Playing video games online with friends or others.",
-                "Podcast listening": "Listening to podcasts for entertainment or knowledge.",
-                "Academic research": "Conducting research for academic or professional purposes.",
-                "Home movie marathon": "Watching a series of movies at home in a single sitting.",
-                "Cycling expedition": "Going on a cycling adventure or long-distance ride.",
-                "Interior decorating": "Decorating and styling the interior of living spaces.",
-                "Software update installations": "Updating software and applications on devices.",
-                "Community cleanup": "Participating in a community cleanup or environmental initiative.",
-                "Online shopping": "Browsing and purchasing items through online shopping platforms.",
-                "Board game creation": "Designing and creating a new board game.",
-                "Trivia night": "Participating in a trivia competition or quiz night.",
-                "Online dating profile setup": "Creating or updating an online dating profile.",
-                "Puzzle solving": "Engaging in solving puzzles for mental stimulation.",
-                "Comic book reading": "Reading comic books or graphic novels for entertainment.",
-                "Craft beer tasting": "Exploring and tasting different craft beers.",
-                "Karaoke night": "Participating in karaoke singing at a local venue.",
-                "Documentary watching": "Watching documentaries for educational or informative content.",
-                "Running errands": "Completing various errands and tasks outside the home.",
-                "Astrophotography": "Photographing celestial objects and astronomical events.",
-                "Bike maintenance": "Performing maintenance on a bicycle.",
-                "Online chess game": "Playing chess online with opponents.",
-                "Parent-teacher meeting": "Meeting with teachers to discuss a child's academic progress.",
-                "Dentist appointment": "Scheduled visit to the dentist for dental check-up and care.",
-                "Personal finance review": "Reviewing personal financial goals and investments.",
-                "DIY home spa day": "Creating a relaxing spa experience at home.",
-                "Family board game night": "Playing board games with family members.",
-                "Collectible card gaming": "Participating in collectible card games like Magic: The Gathering.",
-                "Art and wine night": "Combining art activities with wine tasting for a creative experience.",
-                "Virtual travel exploration": "Exploring virtual travel destinations through online platforms.",
-                "Neighborhood clean-up": "Participating in a local neighborhood clean-up initiative.",
-                "Ice cream tasting": "Sampling and trying different flavors of ice cream.",
-                "Local museum visit": "Visiting a local museum for cultural and historical exploration.",
-                "Candle making": "Creating handmade candles through a candle-making process.",
-                "Virtual reality travel experience": "Exploring virtual reality travel simulations.",
-                "Photobook creation": "Compiling and creating a photobook with memorable photos.",
-                "Online cooking class": "Participating in a virtual cooking class to learn new recipes.",
-                "Online board game night": "Playing board games with friends through online platforms.",
-            }
-            activities_to_create = activities_desired - Activity.objects.count()
-            if activities_to_create > 0:
-                for _ in range(activities_to_create):
-                    activity_name = list(activities_dict.keys())[
-                        fake.random_int(0, len(activities_dict) - 1)]
-                    activity_user = User.objects.all(
-                    )[fake.random_int(0, User.objects.count() - 1)]
-                    activity_category = Category.objects.all(
-                    )[fake.random_int(0, Category.objects.count() - 1)]
-                    activity_description = activities_dict[activity_name]
-                    activity_date_start = make_aware(
-                        fake.date_time_between(start_date='-1y', end_date='+1y'))
-                    activity_date_end = make_aware(fake.date_time_between(
-                        start_date=activity_date_start, end_date=activity_date_start + timedelta(hours=6)))
-                    activity_length = activity_date_end - activity_date_start
-                    activity_importance_level = fake.random_element(
-                        elements=('M', 'S', 'C', 'W', 'N'))
-                    Activity.objects.create(
-                        name=activity_name,
-                        user=activity_user,
-                        category=activity_category,
-                        description=activity_description,
-                        date_start=activity_date_start,
-                        date_end=activity_date_end,
-                        length=activity_length,
-                        importance_level=activity_importance_level
-                    )
-                    print(f'Created activity {activity_name}')
-                print(f'Created {activities_to_create} activities.')
-            elif activities_to_create < 0:
-                for _ in range(-activities_to_create):
-                    if Activity.objects.count() > 1:
-                        activity = Activity.objects.all()[fake.random_int(
-                            0, Activity.objects.count() - 1)]
-                    else:
-                        activity = Activity.objects.all()[0]
-                    activity.delete()
-                    print(f'Deleted activity {activity.name}')
-                print(f'Deleted {-activities_to_create} activities.')
-
+        self.generate_fake_data(
+            users_desired, categories_desired, activities_desired, verbosity, fake)
         print('Generating fake data completed.')
         print('User count: ' + str(User.objects.count()))
         print('Category count: ' + str(Category.objects.count()))
         print('Activity count: ' + str(Activity.objects.count()))
+
+    def make_users(self, users_desired, verbosity, fake):
+        def _create_user():
+            user = User.objects.create_user(
+                username=fake.user_name(),
+                email=fake.email(),
+                password=fake.password()
+            )
+            return user
+
+        def _delete_user():
+            user = User.objects.all()[fake.random_int(
+                0, User.objects.count() - 1)]
+            user.delete()
+            return user
+
+        if users_desired is not None:
+            users_to_create = users_desired - User.objects.count()
+            users_before = User.objects.count()
+            if users_to_create > 0:
+                # creating users
+                for _ in range(users_to_create):
+                    if verbosity:
+                        print(f'Created user {_create_user().username}')
+
+            elif users_to_create < 0:
+                # deleting users
+                for _ in range(-users_to_create):
+                    if verbosity:
+                        print(f'Deleted user {_delete_user().username}')
+
+            users_after = User.objects.count()
+            if users_after > users_before:
+                print(f'Created {users_after - users_before} users.')
+            elif users_after < users_before:
+                print(f'Deleted {users_before - users_after} users.')
+            else:
+                print(
+                    'No users created or deleted as the desired number of users is equal to the number of existing users.')
+
+    def make_categories(self, categories_desired, verbosity, fake):
+        from .faker_data import categories_dict
+
+        def _create_category():
+            category_name = list(categories_dict.keys())[
+                fake.random_int(0, len(categories_dict) - 1)]
+            category_user = User.objects.all(
+            )[fake.random_int(0, User.objects.count() - 1)]
+            category_description = categories_dict[category_name]
+            category_color = fake.color_name()
+            category_icon = fake.file_name(extension='svg')
+            category_importance_level = fake.random_element(
+                elements=('M', 'S', 'C', 'W', 'N'))
+            category = Category.objects.create(
+                name=category_name,
+                user=category_user,
+                description=category_description,
+                color=category_color,
+                icon=category_icon,
+                importance_level=category_importance_level
+            )
+            return category
+
+        def _delete_category():
+            if Category.objects.count() > 1:
+                category = Category.objects.all()[fake.random_int(
+                    0, Category.objects.count() - 1)]
+            else:
+                category = Category.objects.all()[0]
+            category.delete()
+            return category
+
+        categories_to_create = categories_desired - Category.objects.count()
+        categories_before = Category.objects.count()
+        if categories_to_create > 0:
+            for _ in range(categories_to_create):
+                if verbosity:
+                    print(f'Created category {_create_category().name}')
+
+        elif categories_to_create < 0:
+            for _ in range(-categories_to_create):
+                if verbosity:
+                    print(f'Deleted category {_delete_category().name}')
+
+        categories_after = Category.objects.count()
+        if categories_after > categories_before:
+            print(
+                f'Created {categories_after - categories_before} categories.')
+        elif categories_after < categories_before:
+            print(
+                f'Deleted {categories_before - categories_after} categories.')
+        else:
+            print('No categories created or deleted as the desired number of categories is equal to the number of existing categories.')
+
+    def make_activities(self, activities_desired, verbosity, fake):
+        from .faker_data import activities_dict
+
+        def _create_activity():
+            activity_name = list(activities_dict.keys())[
+                fake.random_int(0, len(activities_dict) - 1)]
+            activity_user = User.objects.all(
+            )[fake.random_int(0, User.objects.count() - 1)]
+            activity_category = Category.objects.all(
+            )[fake.random_int(0, Category.objects.count() - 1)]
+            activity_description = activities_dict[activity_name]
+            activity_date_start = make_aware(
+                fake.date_time_between(start_date='-1y', end_date='+1y'))
+            activity_date_end = make_aware(fake.date_time_between(
+                start_date=activity_date_start, end_date=activity_date_start + timedelta(hours=6)))
+            activity_length = activity_date_end - activity_date_start
+            activity_importance_level = fake.random_element(
+                elements=('M', 'S', 'C', 'W', 'N'))
+            activity = Activity.objects.create(
+                name=activity_name,
+                user=activity_user,
+                category=activity_category,
+                description=activity_description,
+                date_start=activity_date_start,
+                date_end=activity_date_end,
+                length=activity_length,
+                importance_level=activity_importance_level
+            )
+            return activity
+
+        def _delete_activity():
+            if Activity.objects.count() > 1:
+                activity = Activity.objects.all()[fake.random_int(
+                    0, Activity.objects.count() - 1)]
+            else:
+                activity = Activity.objects.all()[0]
+            activity.delete()
+            return activity
+
+        activities_to_create = activities_desired - Activity.objects.count()
+        activities_before = Activity.objects.count()
+        if activities_to_create > 0:
+            for _ in range(activities_to_create):
+                if verbosity:
+                    print(f'Created activity {_create_activity().name}')
+        elif activities_to_create < 0:
+            for _ in range(-activities_to_create):
+                if verbosity:
+                    print(f'Deleted activity {_delete_activity().name}')
+
+        activities_after = Activity.objects.count()
+        if activities_after > activities_before:
+            print(
+                f'Created {activities_after - activities_before} activities.')
+        elif activities_after < activities_before:
+            print(
+                f'Deleted {activities_before - activities_after} activities.')
+        else:
+            print('No activities created or deleted as the desired number of activities is equal to the number of existing activities.')
+
+    def generate_fake_data(self, users_desired, categories_desired, activities_desired, verbosity, fake):
+        if users_desired is not None:
+            try:
+                self.make_users(users_desired, verbosity, fake)
+            except Exception as e:
+                raise e
+
+        if categories_desired is not None:
+            try:
+                self.make_categories(categories_desired, verbosity, fake)
+            except Exception as e:
+                raise e
+
+        if activities_desired is not None:
+            self.make_activities(activities_desired, verbosity, fake)
