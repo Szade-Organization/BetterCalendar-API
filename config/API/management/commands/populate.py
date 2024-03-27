@@ -74,14 +74,16 @@ class Command(BaseCommand):
             if users_to_create > 0:
                 # creating users
                 for _ in range(users_to_create):
+                    name = _create_user().username
                     if verbosity:
-                        print(f'Created user {_create_user().username}')
+                        print(f'Created user {name}')
 
             elif users_to_create < 0:
                 # deleting users
                 for _ in range(-users_to_create):
+                    name = _delete_user().username
                     if verbosity:
-                        print(f'Deleted user {_delete_user().username}')
+                        print(f'Deleted user {name}')
 
             users_after = User.objects.count()
             if users_after > users_before:
@@ -128,13 +130,15 @@ class Command(BaseCommand):
         categories_before = Category.objects.count()
         if categories_to_create > 0:
             for _ in range(categories_to_create):
+                name = _create_category().name
                 if verbosity:
-                    print(f'Created category {_create_category().name}')
+                    print(f'Created category {name}')
 
         elif categories_to_create < 0:
             for _ in range(-categories_to_create):
+                name = _delete_category().name
                 if verbosity:
-                    print(f'Deleted category {_delete_category().name}')
+                    print(f'Deleted category {name}')
 
         categories_after = Category.objects.count()
         if categories_after > categories_before:
@@ -189,12 +193,14 @@ class Command(BaseCommand):
         activities_before = Activity.objects.count()
         if activities_to_create > 0:
             for _ in range(activities_to_create):
+                name = _create_activity().name
                 if verbosity:
-                    print(f'Created activity {_create_activity().name}')
+                    print(f'Created activity {name}')
         elif activities_to_create < 0:
             for _ in range(-activities_to_create):
+                name = _delete_activity().name
                 if verbosity:
-                    print(f'Deleted activity {_delete_activity().name}')
+                    print(f'Deleted activity {name}')
 
         activities_after = Activity.objects.count()
         if activities_after > activities_before:
