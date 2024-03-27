@@ -6,19 +6,19 @@
 # This is because the container is build in the github action on a different database
 if [ -n "$POPULATE_INITIALIZED" ]; then
     echo "Populate already initiated - skipping"
-    exit 1
+    return 0
 fi
 if python config/manage.py migrate; then
     echo "Migrations applied"
 else
     echo "Migrations failed"
-    exit 1
+    return 1
 fi
 if python config/manage.py populate -u 3 -c 40 -a 400; then
     echo "Database populated"
 else
     echo "Database population failed"
-    exit 1
+    return 1
 fi
 export POPULATE_INITIALIZED=1
-exit 1
+echo "Populate initialized"
