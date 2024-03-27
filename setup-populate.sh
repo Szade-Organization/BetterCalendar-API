@@ -20,10 +20,5 @@ else
     echo "Database population failed"
     return 1
 fi
-<<<<<<< Updated upstream
-export POPULATE_INITIED=1
-exit 1
-=======
 export POPULATE_INITIALIZED=1
 echo "Populate initialized"
->>>>>>> Stashed changes
