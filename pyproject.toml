@@ -6,6 +6,10 @@ description = "Api for the better calendar project."
 authors = ["Wojciech Szade <wojciech.szade@gmail.com>"]
 readme = "README.md"
 
+[virtualenvs]
+create = true
+in-project = true
+
 [tool.poetry.dependencies]
 python = "^3.11"
 django = "4.0.10"
