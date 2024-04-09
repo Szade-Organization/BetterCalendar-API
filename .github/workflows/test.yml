@@ -47,4 +47,4 @@ jobs:
         BC_DB_CONNECTION_STRING: mongodb://user:password@localhost/?retryWrites=true&w=majority
       run: |
         cd config
-        poetry python manage.py test
+        poetry run python manage.py test
