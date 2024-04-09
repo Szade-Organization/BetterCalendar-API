@@ -1,10 +1,10 @@
 [tool.poetry]
-package-mode = false
 name = "better-calendar-api"
 version = "0.1.0"
 description = "Api for the better calendar project."
 authors = ["Wojciech Szade <wojciech.szade@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [virtualenvs]
 create = true
@@ -25,5 +25,5 @@ dnspython = "2.4.2"
 
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.8.2"]
 build-backend = "poetry.core.masonry.api"

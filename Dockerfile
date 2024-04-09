@@ -4,21 +4,18 @@
 FROM python:3.11
 
 # Set environment variables
-ENV POETRY_VERSION=1.1.10 \
+ENV POETRY_VERSION=1.8.2 \
     POETRY_HOME="/opt/poetry" \
     PATH="/opt/poetry/bin:$PATH"
 
 # Install dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    curl \
-    && \
-    curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python3 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+RUN DEBIAN_FRONTEND=noninteractive \
+  apt-get update \
+  && apt-get install -y python3 \
+  && rm -rf /var/lib/apt/lists/* && \
+  curl -sSL https://install.python-poetry.org | python3 -
 
-# Copy only the pyproject.toml and poetry.lock files
-COPY pyproject.toml poetry.lock /code/
+COPY . /code
 
 # Set the working directory
 WORKDIR /code
@@ -26,8 +23,6 @@ WORKDIR /code
 # Install dependencies using Poetry
 RUN poetry install --no-root --no-interaction --no-ansi
 
-# Copy the rest of the application code
-COPY . /code
 
 # Expose port 8000
 EXPOSE 8000
