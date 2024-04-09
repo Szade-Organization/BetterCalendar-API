@@ -3,8 +3,9 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    pass
-
+    first_name = None
+    last_name = None
+    email = models.EmailField(unique=True, blank=False, null=False)
 
 class Category(models.Model):
     IMPORTANCE_LEVEL_CHOICES = [
@@ -39,7 +40,7 @@ class Activity(models.Model):
         max_length=1, choices=Category.IMPORTANCE_LEVEL_CHOICES, default='n')
     date_created = models.DateTimeField(auto_now_add=True)
     date_modified = models.DateTimeField(auto_now=True)
-    
+
     @property
     def is_planned(self):
         return self.date_start is not None and self.date_end is not None
@@ -51,4 +52,3 @@ class Activity(models.Model):
         if self.importance_level == 'n':
             self.importance_level = self.category.importance_level
         super(Activity, self).save(*args, **kwargs)
-

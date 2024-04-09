@@ -27,5 +27,4 @@ RUN poetry install --no-root --no-interaction --no-ansi
 # Expose port 8000
 EXPOSE 8000
 
-# Define the command to run the application
 CMD . ./setup-populate.sh; poetry run python manage.py runserver 0.0.0.0:8000

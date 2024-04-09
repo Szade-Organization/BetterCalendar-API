@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from datetime import timedelta
+from rest_framework.settings import api_settings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -30,6 +32,11 @@ ALLOWED_HOSTS = []
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# FRONTEND_HOST = os.environ["FRONTEND_HOST"]
+FRONTEND_HOST = "localhost:3000"
+# EMAIL_ADDRESS = os.environ["EMAIL_ADDRESS"]
+EMAIL_ADDRESS = "no-reply@example.com"
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,7 +49,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'drf_yasg',
     'django_filters',
-    'corsheaders'
+    'corsheaders',
+    'rest_framework',
+    'knox',
+    'rest_registration',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +67,25 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'config.urls'
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'knox.auth.TokenAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication'
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
+
+REST_KNOX = {
+    'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
+    'TOKEN_TTL': timedelta(hours=72),
+    'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+    'AUTO_REFRESH': True,
+    'EXPIRY_DATETIME_FORMAT': api_settings.DATETIME_FORMAT,
+}
 
 TEMPLATES = [
     {
@@ -91,6 +120,11 @@ SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Basic': {
             'type': 'basic'
+        },
+        'Token': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
         }
     }
 }
@@ -153,3 +187,21 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Adding our custom migrations to knox without the knox field
+
+MIGRATION_MODULES = {
+    'knox': 'API.knox_migrations',
+}
+
+REST_REGISTRATION = {
+    'REGISTER_VERIFICATION_URL': str(FRONTEND_HOST) + '/verify-user/',
+    'RESET_PASSWORD_VERIFICATION_URL': str(FRONTEND_HOST) + '/reset-password/',
+    'REGISTER_EMAIL_VERIFICATION_URL': str(FRONTEND_HOST) + '/verify-email/',
+    'VERIFICATION_FROM_EMAIL': str(EMAIL_ADDRESS),
+    'REGISTER_VERIFICATION_AUTO_LOGIN': True,
+    'REGISTER_VERIFICATION_ONE_TIME_USE': True,
+}
+
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = BASE_DIR / "../emails"
