@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "better-calendar-api"
+version = "0.1.0"
+description = "Api for the better calendar project."
+authors = ["Wojciech Szade <wojciech.szade@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[virtualenvs]
+create = true
+in-project = true
+
+[tool.poetry.dependencies]
+python = "^3.11"
+django = "4.0.10"
+drf-yasg = "^1.21.7"
+django-cors-headers = "^4.3.1"
+django-filter = "23.5"
+djongo = "^1.3.6"
+djangorestframework = "^3.15.1"
+croniter = "2.0.1"
+faker = "^24.7.1"
+pymongo = "3.12.3"
+dnspython = "2.4.2"
+django-rest-knox = "^4.2.0"
+django-rest-registration = "^0.8.3"
+
+
+[build-system]
+requires = ["poetry-core>=1.8.2"]
+build-backend = "poetry.core.masonry.api"
