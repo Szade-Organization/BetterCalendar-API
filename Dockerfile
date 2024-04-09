@@ -10,4 +10,4 @@ WORKDIR /code
 
 EXPOSE 8000
 
-CMD  source setup-populate.sh; python config/manage.py runserver 0.0.0.0:8000
+CMD  . ./setup-populate.sh; python manage.py runserver 0.0.0.0:8000
