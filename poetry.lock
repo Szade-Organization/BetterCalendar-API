@@ -224,6 +224,21 @@ django = ">=3.2"
 djangorestframework = "*"
 
 [[package]]
+name = "django-rest-registration"
+version = "0.8.3"
+description = "User registration REST API, based on django-rest-framework"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "django-rest-registration-0.8.3.tar.gz", hash = "sha256:8ef0bbc5a88af854eb6dd11d1614bb71c41a578a6469b48d1a5478683bf8a0c4"},
+    {file = "django_rest_registration-0.8.3-py3-none-any.whl", hash = "sha256:db6c241073cf76cbe8381bebf94d86ba97c9cd068474bf4cf290c35866aec6d9"},
+]
+
+[package.dependencies]
+Django = ">=2.0"
+djangorestframework = ">=3.3"
+
+[[package]]
 name = "djangorestframework"
 version = "3.15.1"
 description = "Web APIs for Django, made easy."
@@ -604,4 +619,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "5c04eab6d1a332b307b5fabb994f68f51e682fa60873a672e839328ad43d5acf"
+content-hash = "fd8c9fbe9f5f1349d2d0fe8b1c688ec3acd20f68e0d5a5097f6f0fceb1bd75d0"
