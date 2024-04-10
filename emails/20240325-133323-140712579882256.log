@@ -1,0 +1,15 @@
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Subject: Please verify your account
+From: no-reply@example.com
+To: user@example.com
+Reply-To: no-reply@example.com
+Date: Mon, 25 Mar 2024 13:33:23 -0000
+Message-ID: <171137360398.73079.1681253142671187391@arch-legion>
+
+Please verify your account by clicking on this link:
+
+http://127.0.0.8:8000/api/verify-user/?user_id=14&timestamp=1711373603&signature=z09zqJOJ3psOW5e28nRyNmEhD5inpeMIQC7EnaxLbc0
+
+-------------------------------------------------------------------------------

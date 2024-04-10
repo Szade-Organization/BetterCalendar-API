@@ -9,13 +9,13 @@ if [ -n "$POPULATE_INITIALIZED" ]; then
     return 0
 fi
 cd config
-if python manage.py migrate; then
+if poetry run python manage.py migrate; then
     echo "Migrations applied"
 else
     echo "Migrations failed"
     return 1
 fi
-if python manage.py populate -u 3 -c 40 -a 400; then
+if poetry run python manage.py populate -u 3 -c 40 -a 400; then
     echo "Database populated"
 else
     echo "Database population failed"

@@ -1,0 +1,15 @@
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Subject: Reset password link was sent
+From: no-reply@example.com
+To: user@example.com
+Reply-To: no-reply@example.com
+Date: Mon, 25 Mar 2024 13:55:13 -0000
+Message-ID: <171137491319.90775.17688764620782631482@arch-legion>
+
+You can reset your password by clicking on this link:
+
+localhost:3000/reset-password/?user_id=15&timestamp=1711374913&signature=fVzBRfZsD047rva7OrqeP_pX6yUnqOKud0gwHOu7I0I
+
+-------------------------------------------------------------------------------
