@@ -37,7 +37,7 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
         if not request.user.is_staff or request.data.get('user') is None:
-            request.data['user'] = request.user.id
+            self.update_user(request)
         
         return super().create(request, *args, **kwargs)
     
@@ -49,7 +49,7 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
         if not request.user.is_staff:
             if request.user.id != object.user_id:
                 return Response(status=status.HTTP_403_FORBIDDEN)
-            request.data['user'] = request.user.id
+            self.update_user(request)
 
         return super().update(request, *args, **kwargs)
 
@@ -62,7 +62,7 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
             if request.user.id != object.user_id:
                 return Response(status=status.HTTP_403_FORBIDDEN)
             if (request.data.get("user") is not None):
-                request.data['user'] = request.user.id
+                self.update_user(request)
         
         return super().patrial_update(request, *args, **kwargs)
     
@@ -81,3 +81,11 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
             return self.model_class.objects.get(id = id)
         except:
             return None
+        
+    def update_user(self, request):
+        try:
+            request.data['user'] = request.user.id
+        except AttributeError:
+            request.data._mutable = True
+            request.data['user'] = request.user.id
+            request.data._mutable = False
