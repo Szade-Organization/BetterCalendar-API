@@ -11,12 +11,13 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
         if request.user.id is None:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         
-        if request.user.is_staff:
-            queryset = self.model_class.objects.all()
-        else:
-            if request.query_params.get("user") not in [None, request.user]:
-                return Response(status=status.HTTP_403_FORBIDDEN)
-            queryset = self.model_class.objects.filter(user_id = request.user.id)
+        user = request.user.id
+        query_user = request.query_params.get("user")
+        if request.user.is_staff and query_user != None:
+            user = query_user
+        self.remove_user_from_query(request)
+
+        queryset = self.model_class.objects.filter(user_id = user)
         
         filterset = self.filterset_class(request.query_params, queryset=queryset)
         serializer = self.serializer_class(filterset.qs, many=True)
@@ -89,3 +90,12 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
             request.data._mutable = True
             request.data['user'] = request.user.id
             request.data._mutable = False
+    
+    def remove_user_from_query(self, request : Request):
+        if request.query_params.get("user") is not None:
+            try:
+                request.query_params.pop("user")
+            except AttributeError:
+                request.query_params._mutable = True
+                request.query_params.pop("user")
+                request.query_params._mutable = False
