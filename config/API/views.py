@@ -37,14 +37,12 @@ class APIInformationView(APIView):
 class CategoryViewSet(GenericPermissionViewSet):
     serializer_class = CategorySerializer
     filterset_class = CategoryFilter
-    model_class = Category
     queryset = Category.objects.all()
 
 
 class ActivityViewSet(GenericPermissionViewSet):
     serializer_class = ActivitySerializer
     filterset_class = ActivityFilter
-    model_class = Activity
     queryset = Activity.objects.all()
 
 

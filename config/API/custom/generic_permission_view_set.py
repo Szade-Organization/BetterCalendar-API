@@ -17,13 +17,16 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
             user = query_user
         self.remove_user_from_query(request)
 
-        queryset = self.model_class.objects.filter(user_id = user)
+        queryset = self.queryset.filter(user_id = user)
         
         filterset = self.filterset_class(request.query_params, queryset=queryset)
         serializer = self.serializer_class(filterset.qs, many=True)
         return Response(serializer.data)
     
     def retrieve(self, request: Request, *args, **kwargs):
+        if request.user.id is None:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
         object = self.try_get_object(kwargs.get('pk'))
         if object is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -43,6 +46,9 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
         return super().create(request, *args, **kwargs)
     
     def update(self, request: Request, *args, **kwargs):
+        if request.user.id is None:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+
         object = self.try_get_object(kwargs.get('pk'))
         if object is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -55,6 +61,9 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
         return super().update(request, *args, **kwargs)
 
     def patrial_update(self, request: Request, *args, **kwargs):
+        if request.user.id is None:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
         object = self.try_get_object(kwargs.get('pk'))
         if object is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -68,6 +77,9 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
         return super().patrial_update(request, *args, **kwargs)
     
     def destroy(self, request: Request, *args, **kwargs):
+        if request.user.id is None:
+            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        
         object = self.try_get_object(kwargs.get('pk'))
         if object is None:
             return Response(status=status.HTTP_404_NOT_FOUND)
@@ -79,7 +91,7 @@ class GenericPermissionViewSet(viewsets.ModelViewSet):
     
     def try_get_object(self, id):
         try:
-            return self.model_class.objects.get(id = id)
+            return self.queryset.get(id = id)
         except:
             return None
         
