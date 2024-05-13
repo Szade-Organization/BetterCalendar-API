@@ -1,14 +1,16 @@
 from django.contrib.auth import login
 
+from rest_framework.request import *
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, viewsets
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import status
 from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 from knox.views import LoginView as KnoxLoginView
 from drf_yasg.utils import swagger_auto_schema
+
+from .custom.generic_permission_view_set import GenericPermissionViewSet
 
 from .models import *
 from .serializers import *
@@ -32,26 +34,16 @@ class APIInformationView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
-    """
-    This viewset provides list, create, retrieve, update, partial_update and destroy actions for Category model.
-    """
-    queryset = Category.objects.all()
+class CategoryViewSet(GenericPermissionViewSet):
     serializer_class = CategorySerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = '__all__'
     filterset_class = CategoryFilter
+    queryset = Category.objects.all()
 
 
-class ActivityViewSet(viewsets.ModelViewSet):
-    """
-    This viewset provides list, create, retrieve, update, partial_update and destroy actions for Activity model.
-    """
-    queryset = Activity.objects.all()
+class ActivityViewSet(GenericPermissionViewSet):
     serializer_class = ActivitySerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = '__all__'
     filterset_class = ActivityFilter
+    queryset = Activity.objects.all()
 
 
 class LoginView(KnoxLoginView):
