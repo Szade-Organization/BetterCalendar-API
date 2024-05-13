@@ -4,6 +4,7 @@ import django
 from django.test import TestCase
 from rest_framework.test import APITestCase
 from django.core.management import call_command
+from django.utils import timezone
 
 from .models import *
 from knox.models import AuthToken
@@ -336,3 +337,170 @@ class RegisterUserTestCase(APITestCase):
         response = self.client.post('/api/auth/login/', login_data)
         self.assertEqual(response.status_code, 200)
         self.assertTrue('token' in response.data)
+
+
+class UserActivityViewSetTestCase(APITestCase):
+    def setUp(self):
+        self.user = User.objects.get(username='testuser')
+        _token_instance, self.token = AuthToken.objects.create(user=self.user)
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token)
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.user = User.objects.create_user(username='testuser')
+        cls.category = Category.objects.create(
+            name='test_category', user=cls.user)
+        cls.activity = Activity.objects.create(
+            user=cls.user,
+            category=cls.category,
+            date_start=timezone.now() - timezone.timedelta(hours=1),
+            date_end=timezone.now() + timezone.timedelta(hours=1)
+        )
+        cls.activity_recent = Activity.objects.create(
+            user=cls.user,
+            category=cls.category,
+            date_start=timezone.now() - timezone.timedelta(days=1),
+            date_end=timezone.now() - timezone.timedelta(hours=1)
+        )
+        cls.activity_next = Activity.objects.create(
+            user=cls.user,
+            category=cls.category,
+            date_start=timezone.now() + timezone.timedelta(hours=1),
+            date_end=timezone.now() + timezone.timedelta(days=1)
+        )
+        
+
+    def test_fetch_all_current_activities(self):
+        response = self.client.get('/api/get-activity/', {'state': ['current'], 'count': [0]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['current']), 1)
+        self.assertEqual(response.data['current'][0]['id'], self.activity.id)
+        
+    def test_fetch_all_recent_activities(self):
+        response = self.client.get('/api/get-activity/', {'state': ['recent'], 'count': [0]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['recent']), 1)
+        self.assertEqual(response.data['recent'][0]['id'], self.activity_recent.id)
+        
+    def test_fetch_all_next_activities(self):
+        response = self.client.get('/api/get-activity/', {'state': ['next'], 'count': [0]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['next']), 1)
+        self.assertEqual(response.data['next'][0]['id'], self.activity_next.id)
+        
+    def test_fetch_all_activities(self):
+        response = self.client.get('/api/get-activity/', {'state': ['current', 'recent', 'next'], 'count': [0, 0, 0]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['current']), 1)
+        self.assertEqual(response.data['current'][0]['id'], self.activity.id)
+        self.assertEqual(len(response.data['recent']), 1)
+        self.assertEqual(response.data['recent'][0]['id'], self.activity_recent.id)
+        self.assertEqual(len(response.data['next']), 1)
+        self.assertEqual(response.data['next'][0]['id'], self.activity_next.id)
+        
+    def test_fetch_multiple_current_activities(self):
+        self.activity_current2 = Activity.objects.create(
+            user=self.user,
+            category=self.category,
+            date_start=timezone.now() - timezone.timedelta(hours=0.5),
+            date_end=timezone.now() + timezone.timedelta(hours=1)
+        )
+        response = self.client.get('/api/get-activity/', {'state': ['current'], 'count': [1]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['current']), 1)
+        self.assertEqual(response.data['current'][0]['id'], self.activity.id)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['current'], 'count': [2]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['current']), 2)
+        self.assertEqual(response.data['current'][0]['id'], self.activity.id)
+        self.assertEqual(response.data['current'][1]['id'], self.activity_current2.id)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['current'], 'count': [3]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['current']), 2)
+        self.assertEqual(response.data['current'][0]['id'], self.activity.id)
+        self.assertEqual(response.data['current'][1]['id'], self.activity_current2.id)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['current'], 'count': [0]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['current']), 2)
+        self.assertEqual(response.data['current'][0]['id'], self.activity.id)
+        self.assertEqual(response.data['current'][1]['id'], self.activity_current2.id)
+        
+    def test_fetch_multiple_recent_activities(self):
+        self.activity_recent2 = Activity.objects.create(
+            user=self.user,
+            category=self.category,
+            date_start=timezone.now() - timezone.timedelta(days=2),
+            date_end=timezone.now() - timezone.timedelta(days=1)
+        )
+        response = self.client.get('/api/get-activity/', {'state': ['recent'], 'count': [1]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['recent']), 1)
+        self.assertEqual(response.data['recent'][0]['id'], self.activity_recent.id)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['recent'], 'count': [2]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['recent']), 2)
+        self.assertEqual(response.data['recent'][0]['id'], self.activity_recent.id)
+        self.assertEqual(response.data['recent'][1]['id'], self.activity_recent2.id)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['recent'], 'count': [3]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['recent']), 2)
+        self.assertEqual(response.data['recent'][0]['id'], self.activity_recent.id)
+        self.assertEqual(response.data['recent'][1]['id'], self.activity_recent2.id)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['recent'], 'count': [0]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['recent']), 2)
+        self.assertEqual(response.data['recent'][0]['id'], self.activity_recent.id)
+        self.assertEqual(response.data['recent'][1]['id'], self.activity_recent2.id)
+        
+    def test_fetch_multiple_next_activities(self):
+        self.activity_next2 = Activity.objects.create(
+            user=self.user,
+            category=self.category,
+            date_start=timezone.now() + timezone.timedelta(days=1),
+            date_end=timezone.now() + timezone.timedelta(days=2)
+        )
+        response = self.client.get('/api/get-activity/', {'state': ['next'], 'count': [1]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['next']), 1)
+        self.assertEqual(response.data['next'][0]['id'], self.activity_next.id)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['next'], 'count': [2]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['next']), 2)
+        self.assertEqual(response.data['next'][0]['id'], self.activity_next.id)
+        self.assertEqual(response.data['next'][1]['id'], self.activity_next2.id)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['next'], 'count': [3]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['next']), 2)
+        self.assertEqual(response.data['next'][0]['id'], self.activity_next.id)
+        self.assertEqual(response.data['next'][1]['id'], self.activity_next2.id)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['next'], 'count': [0]})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data['next']), 2)
+        self.assertEqual(response.data['next'][0]['id'], self.activity_next.id)
+        self.assertEqual(response.data['next'][1]['id'], self.activity_next2.id)
+        
+    def test_wrong_arguments_provided(self):
+        response = self.client.get('/api/get-activity/', {'state': ['current'], 'count': []})
+        self.assertEqual(response.status_code, 400)
+        
+        response = self.client.get('/api/get-activity/', {'state': [], 'count': [1]})
+        self.assertEqual(response.status_code, 400)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['current', 'recent'], 'count': [1]})
+        self.assertEqual(response.status_code, 400)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['wrong'], 'count': [1]})
+        self.assertEqual(response.status_code, 400)
+        
+        response = self.client.get('/api/get-activity/', {'state': ['current'], 'count': [1, 2]})
+        self.assertEqual(response.status_code, 400)
+        
