@@ -62,3 +62,8 @@ class AuthSerializer(serializers.Serializer):
 
         attrs['user'] = user
         return
+
+class UserActivitySerializer(serializers.Serializer):
+    recent = serializers.ListField(child=ActivitySerializer(), required=False)
+    next = serializers.ListField(child=ActivitySerializer(), required=False)
+    current = serializers.ListField(child=ActivitySerializer(), required=False)

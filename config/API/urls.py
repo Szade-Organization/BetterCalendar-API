@@ -20,6 +20,7 @@ schema_view = get_schema_view(
 router = DefaultRouter()
 router.register('category', CategoryViewSet, basename='category')
 router.register('activity', ActivityViewSet, basename='activity')
+router.register('get-activity', UserActivityViewSet, basename='get-activity')
 
 urlpatterns = [
     path('swagger', schema_view.with_ui('swagger', cache_timeout=0),name='schema-swagger-ui'),

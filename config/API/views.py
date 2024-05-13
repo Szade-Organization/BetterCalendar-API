@@ -1,4 +1,5 @@
 from django.contrib.auth import login
+from datetime import datetime
 
 from rest_framework.request import *
 from rest_framework.views import APIView
@@ -6,9 +7,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import permissions
 from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework import viewsets
 
 from knox.views import LoginView as KnoxLoginView
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 from .custom.generic_permission_view_set import GenericPermissionViewSet
 
@@ -84,4 +87,95 @@ class developmentUserCreate(APIView):
         
         
     
+class UserActivityViewSet(viewsets.ViewSet):
+    serializer_class = UserActivitySerializer
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(
+                'state', 
+                in_=openapi.IN_QUERY, 
+                description="List of states to query (e.g., 'recent', 'next', 'current')", 
+                type=openapi.TYPE_ARRAY,
+                items = openapi.Items(type=openapi.TYPE_STRING),
+                required=True, 
+                collectionFormat='multi'
+            ),
+            openapi.Parameter(
+                'count', 
+                in_=openapi.IN_QUERY, 
+                description="List of counts corresponding to each state, must be integers. Pass 0 to get all activities for a given state.", 
+                type=openapi.TYPE_ARRAY,
+                items = openapi.Items(type=openapi.TYPE_INTEGER), 
+                required=True, 
+                collectionFormat='multi'
+            )
+        ]
+    )
+    def list(self, request):
+        def _checkEmpty(state, count):
+            if not state:
+                return Response({'error': 'State is empty'}, status=status.HTTP_400_BAD_REQUEST)
+            if not count:
+                return Response({'error': 'Count is empty'}, status=status.HTTP_400_BAD_REQUEST)
+            return None
+        
+        user = request.user
+        state = request.query_params.getlist('state')
+        count = request.query_params.getlist('count')
+        
+        check_empty = _checkEmpty(state, count)
+        if check_empty:
+            return check_empty
+        allowed_states = ['recent', 'next', 'current']
+        if any(t not in allowed_states for t in state):
+            invalid_states = [t for t in state if t not in allowed_states]
+            return Response({'error': 'Invalid states: ' + ', '.join(invalid_states)}, status=status.HTTP_400_BAD_REQUEST)
+            
+        count = [int(c) for c in count]
+        activities = {t: [] for t in state}
+        
+        if len(state) != len(count):
+            return Response({'error': 'State and count must have the same length (you need to pass a count for every given state)'}, status=status.HTTP_400_BAD_REQUEST)
+
+        for t, n in zip(state, count):
+            activity = self._getActivity(user, t, n)
+            if activity:
+                activities[t].extend(activity)
+
+        serializer = self.serializer_class(activities)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def _getCurrentActivity(self, user, n):
+        """ Retrieves the current activity if it exists """
+        a = Activity.objects.filter(user=user, date_start__lte=datetime.now(), date_end__gte=datetime.now()).order_by('date_start')
+        if n:
+            return a[:n]
+        return a
     
+    def _getRecentActivities(self, user, n):
+        a = Activity.objects.filter(
+            user=user, 
+            date_end__lt=datetime.now()
+        ).order_by('-date_end')
+        if n:
+            return a[:n]
+        return a
+    
+    def _getNextActivities(self, user, n):
+        a = Activity.objects.filter(
+            user=user,
+            date_start__gt=datetime.now()
+        ).order_by('date_start')
+        if n:
+            return a[:n]
+        return a
+
+    def _getActivity(self, user, t, n):
+        """ Retrieves activities based on type (recent, next, current) """
+        if t == 'recent':
+            return self._getRecentActivities(user, n)
+        elif t == 'next':
+            return self._getNextActivities(user, n)
+        elif t == 'current':
+            return self._getCurrentActivity(user, n)
+            
