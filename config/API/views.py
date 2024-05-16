@@ -1,5 +1,5 @@
 from django.contrib.auth import login
-from datetime import datetime
+from django.utils import timezone
 
 from rest_framework.request import *
 from rest_framework.views import APIView
@@ -147,7 +147,7 @@ class UserActivityViewSet(viewsets.ViewSet):
 
     def _getCurrentActivity(self, user, n):
         """ Retrieves the current activity if it exists """
-        a = Activity.objects.filter(user=user, date_start__lte=datetime.now(), date_end__gte=datetime.now()).order_by('date_start')
+        a = Activity.objects.filter(user=user, date_start__lte=timezone.now(), date_end__gte=timezone.now()).order_by('date_start')
         if n:
             return a[:n]
         return a
@@ -155,7 +155,7 @@ class UserActivityViewSet(viewsets.ViewSet):
     def _getRecentActivities(self, user, n):
         a = Activity.objects.filter(
             user=user, 
-            date_end__lt=datetime.now()
+            date_end__lt=timezone.now()
         ).order_by('-date_end')
         if n:
             return a[:n]
@@ -164,7 +164,7 @@ class UserActivityViewSet(viewsets.ViewSet):
     def _getNextActivities(self, user, n):
         a = Activity.objects.filter(
             user=user,
-            date_start__gt=datetime.now()
+            date_start__gt=timezone.now()
         ).order_by('date_start')
         if n:
             return a[:n]
