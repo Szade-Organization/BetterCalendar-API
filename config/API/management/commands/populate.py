@@ -158,8 +158,7 @@ class Command(BaseCommand):
                 fake.random_int(0, len(activities_dict) - 1)]
             activity_user = User.objects.all(
             )[fake.random_int(0, User.objects.count() - 1)]
-            activity_category = Category.objects.all(
-            )[fake.random_int(0, Category.objects.count() - 1)]
+            activity_category = Category.objects.filter(user=activity_user)[fake.random_int(0, Category.objects.filter(user=activity_user).count() - 1)]
             activity_description = activities_dict[activity_name]
             activity_date_start = make_aware(
                 fake.date_time_between(start_date='-1y', end_date='+1y'))
